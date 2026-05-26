@@ -2663,10 +2663,6 @@ window.sendPetChatMessage = function () {
     }, 1000);
   }
 };
-if (window.playSynthSound) window.playSynthSound('click');
-    }, 1000);
-  }
-};
 
 function renderPetChatBoxOnly(pet) {
   const chatBox = document.getElementById('pet-chat-box');
