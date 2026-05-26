@@ -2676,8 +2676,9 @@ function renderPetChatBoxOnly(pet) {
     bubble.className = `chat-bubble ${chat.sender === 'user' ? 'user-bubble' : 'pet-bubble'}`;
 
     if (chat.image) {
+      const resolvedImgUrl = chat.image.startsWith('/uploads') && window.location.protocol === 'file:' ? 'http://localhost:3000' + chat.image : chat.image;
       const imgEl = document.createElement('img');
-      imgEl.src = chat.image;
+      imgEl.src = resolvedImgUrl;
       imgEl.style.maxWidth = "100%";
       imgEl.style.maxHeight = "120px";
       imgEl.style.borderRadius = "8px";
@@ -2700,7 +2701,7 @@ function renderPetChatBoxOnly(pet) {
         overlay.style.cursor = 'zoom-out';
 
         const largeImg = document.createElement('img');
-        largeImg.src = chat.image;
+        largeImg.src = resolvedImgUrl;
         largeImg.style.maxWidth = '90%';
         largeImg.style.maxHeight = '90%';
         largeImg.style.borderRadius = '8px';

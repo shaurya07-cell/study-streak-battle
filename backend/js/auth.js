@@ -2,6 +2,17 @@
    STUDY STREAK BATTLE - CLIENT AUTHENTICATION (PURE LOCAL STORAGE)
    ========================================== */
 
+// Global file:// protocol API base URL redirect helper
+if (window.location.protocol === 'file:') {
+  const originalFetch = window.fetch;
+  window.fetch = function (input, init) {
+    if (typeof input === 'string' && input.startsWith('/api')) {
+      input = 'http://localhost:3000' + input;
+    }
+    return originalFetch(input, init);
+  };
+}
+
 // ════════════════════════════════════════════════════════════
 // IMPORTANT: Replace this config block with your own credentials from Firebase Console!
 const firebaseConfig = {
