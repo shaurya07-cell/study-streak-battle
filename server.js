@@ -32,15 +32,12 @@ if (!existsSync(uploadDir)) {
   mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = file.originalname.split('.').pop();
-    cb(null, `attachment-${uniqueSuffix}.${ext}`);
-  }
+import multer from "multer";
+
+const storage = multer.memoryStorage();
+
+const upload = multer({
+  storage: storage
 });
 const upload = multer({ storage });
 
@@ -134,7 +131,7 @@ apiRouter.post('/verify-otp', (req, res) => {
 apiRouter.post('/sync-user', async (req, res) => {
   const { username, data } = req.body;
   if (!username || !data) return res.status(400).json({ success: false, message: 'Username and data are required.' });
-  
+
   try {
     const key = username.toLowerCase();
     const user = await User.findOneAndUpdate(
@@ -176,12 +173,12 @@ apiRouter.get('/chats/:username', async (req, res) => {
 apiRouter.post('/chats/message', async (req, res) => {
   const { username, sender, text, imageUrl } = req.body;
   if (!username || !sender) return res.status(400).json({ success: false, message: 'Username and sender are required.' });
-  
+
   try {
     const key = username.toLowerCase();
     const session = await ChatSession.findOneAndUpdate(
       { username: new RegExp(`^${key}$`, 'i') },
-      { 
+      {
         $push: { messages: { sender, text, imageUrl, timestamp: new Date() } },
         $set: { updatedAt: new Date() }
       },
@@ -219,7 +216,7 @@ apiRouter.get('/admin/users', async (req, res) => {
 apiRouter.post('/admin/gift-gp', async (req, res) => {
   const { username, amount } = req.body;
   if (!username || !amount || amount <= 0) return res.status(400).json({ success: false, message: 'Invalid parameter.' });
-  
+
   try {
     const key = username.toLowerCase();
     const user = await User.findOneAndUpdate(
@@ -272,11 +269,11 @@ apiRouter.post('/studyrooms/host', async (req, res) => {
   try {
     const room = await ActiveRoom.findOneAndUpdate(
       { roomCode: roomCode.toUpperCase() },
-      { 
-        $set: { 
-          hostUsername, 
-          participants: [{ username: hostUsername, micActive: true, camActive: true, screenActive: false, statusText: 'Focus Desk', joinedAt: new Date() }], 
-          events: [] 
+      {
+        $set: {
+          hostUsername,
+          participants: [{ username: hostUsername, micActive: true, camActive: true, screenActive: false, statusText: 'Focus Desk', joinedAt: new Date() }],
+          events: []
         }
       },
       { new: true, upsert: true }
