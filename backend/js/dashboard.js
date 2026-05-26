@@ -1914,6 +1914,40 @@ document.addEventListener('DOMContentLoaded', async () => {
           currentUser.pet.chatHistory = data.messages;
           renderPetChatBoxOnly(currentUser.pet);
         }
+      } else {
+        // If there are no persistent chat messages in MongoDB, initialize with a warm starting greeting!
+        if (currentUser && currentUser.pet) {
+          const pet = currentUser.pet;
+          const name = pet.name;
+          let greet = "";
+          if (pet.type === 'Focus Cat') {
+            greet = `Meow! Hello study master ${currentUser.username}! I am ${name}, your loyal study cat. Let's study hard together! Purr... Ask me any B.Tech revision doubt!`;
+          } else if (pet.type === 'Zen Panda') {
+            greet = `Greetings, peaceful scholar. I am ${name}. Together we shall walk the path of knowledge and absolute focus. What syllabus concepts can I explain for you today?`;
+          } else if (pet.type === 'Knowledge Dragon') {
+            greet = `GREETINGS, WARRIOR OF INTELLECT! I am ${name}, standard-bearer of the academic flame! Let us conquer the B.Tech syllabus together! Command me with your doubts!`;
+          } else if (pet.type === 'Smart Fox') {
+            greet = `Hey there, clever study coder! I'm ${name}, your quick hack expert. Ready to clear B.Tech exams with smart cheat codes? Shoot your doubts!`;
+          } else if (pet.type === 'Chill Penguin') {
+            greet = `Yo chill study buddy! I'm ${name}, your cool co-pilot. Let's make this study grind a total breeze. Ask me whatever tough engineering stuff is bugging you!`;
+          } else if (pet.type === 'Pixel Robot') {
+            greet = `SYSTEM STATE: INITIALIZED. Companion designation: ${name}. Core directive: process academic doubts, optimize B.Tech variables, and assist student. Awaiting query inputs.`;
+          }
+          
+          pet.chatHistory = [{ sender: 'pet', text: greet }];
+          renderPetChatBoxOnly(pet);
+          
+          // Proactively save this starting greeting to MongoDB so it persists immediately
+          fetch('/api/chats/message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: currentUser.username,
+              sender: 'companion',
+              text: greet
+            })
+          }).catch(err => console.warn('Chat greeting sync error:', err));
+        }
       }
     })
     .catch(err => console.warn('Offline mock chat logs active:', err));
@@ -3165,18 +3199,19 @@ window.clearPetChatAttachment = function () {
 };
 
 function getPetSystemPrompt(type, name) {
+  const brevityRule = " CRITICAL: Keep your response extremely short, concise, and straight to the point (maximum 2-3 sentences).";
   if (type === 'Focus Cat') {
-    return `You are ${name}, a sassy, sleepy but laser-focused B.Tech virtual study cat. Reply in character, adding purrs, meows (e.g. "*meows*", "*purrs*") to explanations. Always give premium academic help and solve problems perfectly.`;
+    return `You are ${name}, a sassy, sleepy but laser-focused B.Tech virtual study cat. Reply in character, adding purrs, meows (e.g. "*meows*", "*purrs*") to explanations. Always give premium academic help and solve problems perfectly.${brevityRule}`;
   } else if (type === 'Zen Panda') {
-    return `You are ${name}, a calm, wise, philosophical virtual Zen Panda. Explain dynamic academic concepts using serene nature analogies (rivers, seasons, leaves). Your voice is peaceful and deep.`;
+    return `You are ${name}, a calm, wise, philosophical virtual Zen Panda. Explain dynamic academic concepts using serene nature analogies (rivers, seasons, leaves). Your voice is peaceful and deep.${brevityRule}`;
   } else if (type === 'Knowledge Dragon') {
-    return `You are ${name}, a proud, regal, passionate virtual Academic Dragon. Answer engineering questions in a grand, powerful, and dramatic voice. Use bold terms and majestic expressions (e.g. "ROAR!", "BEHOLD!", "BY THE ACADEMIC FIRE!").`;
+    return `You are ${name}, a proud, regal, passionate virtual Academic Dragon. Answer engineering questions in a grand, powerful, and dramatic voice. Use bold terms and majestic expressions (e.g. "ROAR!", "BEHOLD!", "BY THE ACADEMIC FIRE!").${brevityRule}`;
   } else if (type === 'Smart Fox') {
-    return `You are ${name}, a clever, quick-witted smart focus fox. Give the student fast cheat codes, shortcuts, clever hacks, and mnemonics to solve their questions instantly. Keep it playful and agile!`;
+    return `You are ${name}, a clever, quick-witted smart focus fox. Give the student fast cheat codes, shortcuts, clever hacks, and mnemonics to solve their questions instantly. Keep it playful and agile!${brevityRule}`;
   } else if (type === 'Chill Penguin') {
-    return `You are ${name}, a laid-back, street-smart chill penguin. Simplify complex technical theories into super casual, easy, laid-back surfer/skater slang concepts. Keep the vibes totally calm!`;
+    return `You are ${name}, a laid-back, street-smart chill penguin. Simplify complex technical theories into super casual, easy, laid-back surfer/skater slang concepts. Keep the vibes totally calm!${brevityRule}`;
   } else {
-    return `You are ${name}, a highly logic-driven, systematic virtual Pixel Robot. Structure your explanations in incredibly clean, bulleted, code-like structures with mechanical tags (e.g. "PROCESSING UNIT", "SUBROUTINE VERIFIED").`;
+    return `You are ${name}, a highly logic-driven, systematic virtual Pixel Robot. Structure your explanations in incredibly clean, bulleted, code-like structures with mechanical tags (e.g. "PROCESSING UNIT", "SUBROUTINE VERIFIED").${brevityRule}`;
   }
 }
 
