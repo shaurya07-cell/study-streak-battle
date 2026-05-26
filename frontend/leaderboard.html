@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Streak Battle - Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dark-theme">
+  <!-- Notification Container (Custom Toast System) -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- LEADERBOARD SECTION -->
+  <section class="app-section">
+    <!-- Navigation Bar -->
+    <header class="app-header">
+      <div class="header-logo" style="display: flex; align-items: center; gap: 0.8rem;">
+        <button id="settings-hamburger-btn" class="header-icon-btn hamburger-btn" title="Open Settings Panel" onclick="window.location.href='dashboard.html?settings=true'">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <i class="fa-solid fa-graduation-cap flame-brand"></i>
+        <h2>Study<span>Streak</span></h2>
+      </div>
+
+      <div class="header-right">
+        <!-- Clean multi-page navigation links -->
+        <nav class="header-nav" style="display: flex; gap: 1.5rem; margin-right: 1rem;">
+          <a href="dashboard.html" class="nav-link" style="font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-laptop-code"></i> Study Desk</a>
+          <a href="leaderboard.html" class="nav-link active" style="font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-ranking-star"></i> Leaderboard</a>
+          <a href="profile.html" class="nav-link" style="font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-user-graduate"></i> Profile</a>
+        </nav>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="header-icon-btn" title="Toggle Theme">
+          <i class="fa-solid fa-sun light-icon"></i>
+          <i class="fa-solid fa-moon dark-icon"></i>
+        </button>
+
+        <!-- RPG Stats Pillars -->
+        <div class="header-rpg-stats">
+          <div class="stat-pillar hp-pillar">
+            <i class="fa-solid fa-heart beat-icon"></i>
+            <span id="header-hp">100 / 100</span>
+          </div>
+          <div class="stat-pillar gold-pillar">
+            <i class="fa-solid fa-coins gold-spin-icon"></i>
+            <span id="header-gold">0 GP</span>
+          </div>
+        </div>
+
+        <!-- User Stats Pill -->
+        <div class="user-profile-pill">
+          <div class="avatar-circle">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div class="profile-details">
+            <span class="user-pill-name" id="user-display-name">Warrior</span>
+            <span class="user-pill-level" id="user-display-level">Level 1</span>
+          </div>
+          <button id="logout-btn" class="logout-btn" title="Log Out">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid Dashboard Content -->
+    <main class="dashboard-grid" style="display: flex; justify-content: center; align-items: flex-start; padding-top: 3rem;">
+      <!-- COLUMN 4: REAL-TIME BATTLE LEADERBOARD -->
+      <div class="grid-card leaderboard-card" style="width: 100%; max-width: 800px;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-ranking-star"></i> Class Consistency Leaderboard</h3>
+          <span class="leaderboard-subtitle">Live local leaderboard</span>
+        </div>
+        <p class="chart-desc" style="margin-bottom: 2rem;">Only real students who have signed up appear here. Study hard, earn XP, and climb above your classmates!</p>
+
+        <div class="leaderboard-list" id="leaderboard-list">
+          <!-- Leaderboard list seeded by leaderboard.js -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2026 Study Streak Battle. Crafted with passion for maximum productivity.</p>
+      <p style="margin-top: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.35);">Created by <strong style="color: rgba(255,255,255,0.55);">Shaurya Hindocha</strong>, RIT Roorkee</p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px;">
+        <a href="https://www.instagram.com/shaurya._.2409_/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#e1306c'; this.style.borderColor='rgba(225,48,108,0.4)'; this.style.background='rgba(225,48,108,0.08)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-instagram"></i> Instagram</a>
+        <a href="https://www.linkedin.com/in/shaurya-hindocha-47961b380/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#0a66c2'; this.style.borderColor='rgba(10,102,194,0.4)'; this.style.background='rgba(10,102,194,0.08)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+        <a href="https://x.com/shaurya240907" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#ffffff'; this.style.borderColor='rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.07)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-x-twitter"></i> Twitter / X</a>
+      </div>
+    </footer>
+  </section>
+
+  <!-- Script Files -->
+  <script src="../backend/js/auth.js"></script>
+  <script src="../backend/js/leaderboard.js"></script>
+</body>
+
+</html>

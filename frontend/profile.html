@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Streak Battle - Character Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+  <!-- Notification Container (Custom Toast System) -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- PROFILE SECTION -->
+  <section class="app-section">
+    <!-- Navigation Bar -->
+    <header class="app-header">
+      <div class="header-logo" style="display: flex; align-items: center; gap: 0.8rem;">
+        <button id="settings-hamburger-btn" class="header-icon-btn hamburger-btn" title="Open Settings Panel" onclick="window.location.href='dashboard.html?settings=true'">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <i class="fa-solid fa-graduation-cap flame-brand"></i>
+        <h2>Study<span>Streak</span></h2>
+      </div>
+
+      <div class="header-right">
+        <nav class="header-nav" style="display: flex; gap: 1.5rem; margin-right: 1rem;">
+          <a href="dashboard.html" class="nav-link" style="font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-laptop-code"></i> Study Desk</a>
+          <a href="leaderboard.html" class="nav-link" style="font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-ranking-star"></i> Leaderboard</a>
+          <a href="profile.html" class="nav-link active" style="font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-user-graduate"></i> Profile</a>
+        </nav>
+
+        <button id="theme-toggle-btn" class="header-icon-btn" title="Toggle Theme">
+          <i class="fa-solid fa-sun light-icon"></i>
+          <i class="fa-solid fa-moon dark-icon"></i>
+        </button>
+
+        <div class="header-rpg-stats">
+          <div class="stat-pillar hp-pillar">
+            <i class="fa-solid fa-heart beat-icon"></i>
+            <span id="header-hp">100 / 100</span>
+          </div>
+          <div class="stat-pillar gold-pillar">
+            <i class="fa-solid fa-coins gold-spin-icon"></i>
+            <span id="header-gold">0 GP</span>
+          </div>
+        </div>
+
+        <div class="user-profile-pill">
+          <div class="avatar-circle">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div class="profile-details">
+            <span class="user-pill-name" id="user-display-name">Warrior</span>
+            <span class="user-pill-level" id="user-display-level">Level 1</span>
+          </div>
+          <button id="logout-btn" class="logout-btn" title="Log Out">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-grid" style="grid-template-columns: repeat(12, 1fr); max-width: 1200px; padding-top: 3rem; margin: 0 auto;">
+      <!-- Profile Card -->
+      <div class="grid-card stats-overview-card" style="grid-column: span 6; align-items: flex-start; text-align: left; justify-content: flex-start; gap: 1.5rem;">
+        <div class="card-header" style="width: 100%; margin-bottom: 0;">
+          <h3><i class="fa-solid fa-id-card"></i> Student Summary</h3>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+          <div class="avatar-circle" style="width: 80px; height: 80px; font-size: 2.5rem; border-radius: 20px;">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div>
+            <h2 id="profile-name" style="font-size: 2rem; line-height: 1.2;">Warrior</h2>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 6px; flex-wrap: wrap;">
+              <span id="profile-branch" class="badge badge-accent" style="font-size: 0.85rem; padding: 4px 12px;">CSE core</span>
+              <span id="profile-phone" class="badge" style="font-size: 0.85rem; padding: 4px 12px; background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2);"><i class="fa-solid fa-phone"></i> Verified</span>
+              <span id="profile-student-id" class="badge" style="font-size: 0.85rem; padding: 4px 12px; background: rgba(99, 102, 241, 0.1); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2);"><i class="fa-solid fa-id-badge"></i> Student ID: SSB0000</span>
+              <span id="profile-parent-id" class="badge" style="font-size: 0.85rem; padding: 4px 12px; background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2);"><i class="fa-solid fa-user-shield"></i> Parent ID: SSBP0000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="xp-progress-bar-wrapper" style="width: 100%; margin-top: 1rem;">
+          <div class="xp-labels">
+            <span id="xp-current-range">0 / 150 XP</span>
+            <span id="xp-percent">0% to Level Up</span>
+          </div>
+          <div class="xp-track">
+            <div class="xp-fill animate-width" id="xp-fill-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="width: 100%; margin-top: 1rem;">
+          <label for="change-branch-select"><i class="fa-solid fa-arrows-spin"></i> Switch Engineering Branch</label>
+          <select id="change-branch-select" class="branch-select-input" style="padding: 0.8rem 1rem;">
+            <option value="CSE++">💻 CSE++ (Computer Science & Eng ++)</option>
+            <option value="CSE core">🖥️ CSE core (Computer Science & Eng Core)</option>
+            <option value="Ai/Ml">🤖 Ai/Ml (Artificial Intelligence & ML)</option>
+            <option value="ECE">📡 ECE (Electronics & Communication)</option>
+            <option value="ME">🔧 ME (Mechanical Engineering)</option>
+            <option value="EE">⚡ EE (Electrical Engineering)</option>
+            <option value="CE">🏗️ CE (Civil Engineering)</option>
+          </select>
+        </div>
+
+        <button id="save-branch-btn" class="btn btn-primary btn-block">
+          <span>Save Changes</span> <i class="fa-solid fa-save"></i>
+        </button>
+      </div>
+
+      <!-- Achievements Card -->
+      <div class="grid-card badges-card" style="grid-column: span 6;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-medal"></i> Milestones & Accolades</h3>
+          <span id="badges-unlocked-ratio" class="badges-subtitle">0 / 3 Unlocked</span>
+        </div>
+        <p class="chart-desc" style="margin-bottom: 2rem;">Earn premium accolades by maintaining continuous study streak thresholds.</p>
+
+        <div class="badges-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem;">
+          <div class="badge-tile locked" id="badge-warrior">
+            <div class="badge-icon-wrapper">
+              <i class="fa-solid fa-user-check badge-graphic"></i>
+              <div class="lock-indicator"><i class="fa-solid fa-lock"></i></div>
+            </div>
+            <h4>3-Day Habit</h4>
+            <span class="xp-unlock-bonus">+50 XP</span>
+          </div>
+
+          <div class="badge-tile locked" id="badge-master">
+            <div class="badge-icon-wrapper">
+              <i class="fa-solid fa-star badge-graphic"></i>
+              <div class="lock-indicator"><i class="fa-solid fa-lock"></i></div>
+            </div>
+            <h4>7-Day Focus</h4>
+            <span class="xp-unlock-bonus">+100 XP</span>
+          </div>
+
+          <div class="badge-tile locked" id="badge-legend">
+            <div class="badge-icon-wrapper">
+              <i class="fa-solid fa-award badge-graphic"></i>
+              <div class="lock-indicator"><i class="fa-solid fa-lock"></i></div>
+            </div>
+            <h4>30-Day Consistency Pro</h4>
+            <span class="xp-unlock-bonus">+500 XP</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>&copy; 2026 Study Streak Battle. Crafted with passion for maximum productivity.</p>
+      <p style="margin-top: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.35);">Created by <strong style="color: rgba(255,255,255,0.55);">Shaurya Hindocha</strong>, RIT Roorkee</p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px;">
+        <a href="https://www.instagram.com/shaurya._.2409_/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#e1306c'; this.style.borderColor='rgba(225,48,108,0.4)'; this.style.background='rgba(225,48,108,0.08)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-instagram"></i> Instagram</a>
+        <a href="https://www.linkedin.com/in/shaurya-hindocha-47961b380/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#0a66c2'; this.style.borderColor='rgba(10,102,194,0.4)'; this.style.background='rgba(10,102,194,0.08)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+        <a href="https://x.com/shaurya240907" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#ffffff'; this.style.borderColor='rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.07)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-x-twitter"></i> Twitter / X</a>
+      </div>
+    </footer>
+  </section>
+
+  <!-- Script Files -->
+  <script src="../backend/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Protect session load
+      const user = await window.checkSession('profile');
+      if (!user) return;
+      
+      // Applyequipped visual theme
+      const body = document.body;
+      body.classList.remove('cyberpunk-theme', 'forest-theme', 'solar-theme');
+      if (user.activeTheme === 'cyber') body.classList.add('cyberpunk-theme');
+      else if (user.activeTheme === 'forest') body.classList.add('forest-theme');
+      else if (user.activeTheme === 'solar') body.classList.add('solar-theme');
+
+      // Populate navigation header details
+      const nameEl = document.getElementById('user-display-name');
+      const levelEl = document.getElementById('user-display-level');
+      const hpEl = document.getElementById('header-hp');
+      const goldEl = document.getElementById('header-gold');
+      
+      if (nameEl) nameEl.innerText = user.username;
+      if (levelEl) levelEl.innerText = `Level ${user.level} (${user.branch || 'General'})`;
+      if (hpEl) hpEl.innerText = `${user.hp} / 100`;
+      if (goldEl) goldEl.innerText = `${user.gold} GP`;
+
+      // Theme toggle trigger
+      const themeToggle = document.getElementById('theme-toggle-btn');
+      if (themeToggle) {
+        themeToggle.addEventListener('click', async () => {
+          if (window.playSynthSound) window.playSynthSound('click');
+          const isDark = body.classList.contains('dark-theme');
+          body.classList.toggle('dark-theme', !isDark);
+          body.classList.toggle('light-theme', isDark);
+          localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        });
+        const savedVisual = localStorage.getItem('theme');
+        if (savedVisual === 'light') {
+          body.classList.remove('dark-theme');
+          body.classList.add('light-theme');
+        }
+      }
+
+      // Populate character profile cards
+      document.getElementById('profile-name').innerText = user.username;
+      document.getElementById('profile-branch').innerText = user.branch || 'General';
+      document.getElementById('profile-phone').innerHTML = `<i class="fa-solid fa-phone"></i> ${user.phone || 'No Phone Verified'}`;
+      document.getElementById('profile-student-id').innerHTML = `<i class="fa-solid fa-id-badge"></i> Student ID: ${user.studentId || 'SSB0000'}`;
+      document.getElementById('profile-parent-id').innerHTML = `<i class="fa-solid fa-user-shield"></i> Parent ID: ${user.parentId || 'SSBP0000'}`;
+      document.getElementById('change-branch-select').value = user.branch || 'CSE core';
+
+      // Stats formulas
+      const xpNeeded = user.level * 150;
+      const xpPercent = Math.min(100, (user.xp / xpNeeded) * 100);
+      document.getElementById('xp-current-range').innerText = `${user.xp} / ${xpNeeded} XP`;
+      document.getElementById('xp-percent').innerText = `${Math.round(xpPercent)}% to Level Up`;
+      document.getElementById('xp-fill-bar').style.width = `${xpPercent}%`;
+
+      // Unlocked achievement tiles mapping
+      const achievements = [
+        { id: 'badge-warrior', name: '3-Day Warrior' },
+        { id: 'badge-master', name: '7-Day Focus Master' },
+        { id: 'badge-legend', name: '30-Day Legend' }
+      ];
+      
+      let unlockedCount = 0;
+      achievements.forEach(ach => {
+        const tile = document.getElementById(ach.id);
+        if (tile) {
+          if (user.unlockedBadges.includes(ach.name)) {
+            tile.classList.remove('locked');
+            tile.classList.add('unlocked');
+            unlockedCount++;
+          } else {
+            tile.classList.add('locked');
+            tile.classList.remove('unlocked');
+          }
+        }
+      });
+      document.getElementById('badges-unlocked-ratio').innerText = `${unlockedCount} / 3 Unlocked`;
+
+      // Change engineering branch profile trigger
+      document.getElementById('save-branch-btn').addEventListener('click', () => {
+        const chosenBranch = document.getElementById('change-branch-select').value;
+        const token = localStorage.getItem('token');
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const usernameKey = token && token.startsWith('local_session_') ? token.split('local_session_')[1] : '';
+        const userObj = users[usernameKey];
+        
+        if (!userObj) {
+          if (window.showToast) window.showToast('Save Failed', 'No active session found.', 'alert');
+          else alert('No active session found.');
+          return;
+        }
+        
+        userObj.branch = chosenBranch;
+        users[usernameKey] = userObj;
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        if (window.showToast) {
+          window.showToast('Profile Saved!', `Engineering branch changed to ${chosenBranch}`, 'success');
+        } else {
+          alert(`Profile Saved! Engineering branch changed to ${chosenBranch}`);
+        }
+        
+        // Re-update interface details
+        document.getElementById('profile-branch').innerText = userObj.branch;
+        if (levelEl) levelEl.innerText = `Level ${userObj.level} (${userObj.branch})`;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Streak Battle - The Focus Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dark-theme">
+  <!-- Notification Container (Custom Toast System) -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- DASHBOARD SECTION -->
+  <section id="app-section" class="app-section">
+    <!-- Navigation Bar -->
+    <header class="app-header">
+      <div class="header-logo" style="display: flex; align-items: center; gap: 0.8rem;">
+        <button id="settings-hamburger-btn" class="header-icon-btn hamburger-btn" title="Open Settings Panel"
+          onclick="window.toggleSettingsModal(true)">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <i class="fa-solid fa-graduation-cap flame-brand"></i>
+        <h2>Study<span>Streak</span></h2>
+      </div>
+
+      <div class="header-right">
+        <!-- Clean multi-page navigation links -->
+        <nav class="header-nav" style="display: flex; gap: 1.5rem; margin-right: 1rem;">
+          <a href="dashboard.html" class="nav-link active"
+            style="font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 6px;"><i
+              class="fa-solid fa-laptop-code"></i> Study Desk</a>
+          <a href="leaderboard.html" class="nav-link"
+            style="font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px;"><i
+              class="fa-solid fa-ranking-star"></i> Leaderboard</a>
+          <a href="profile.html" class="nav-link"
+            style="font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px;"><i
+              class="fa-solid fa-user-graduate"></i> Profile</a>
+        </nav>
+
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="header-icon-btn" title="Toggle Theme">
+          <i class="fa-solid fa-sun light-icon"></i>
+          <i class="fa-solid fa-moon dark-icon"></i>
+        </button>
+
+        <!-- RPG Stats Pillars -->
+        <div class="header-rpg-stats">
+          <div class="stat-pillar hp-pillar" title="Focus Energy (HP) - Complete goals to maintain your focus!">
+            <i class="fa-solid fa-heart beat-icon"></i>
+            <span id="header-hp">100 / 100</span>
+          </div>
+          <div class="stat-pillar gold-pillar" title="Study Reward Coins (GP) - Earned from completing goals!">
+            <i class="fa-solid fa-coins gold-spin-icon"></i>
+            <span id="header-gold">0 GP</span>
+          </div>
+        </div>
+
+        <!-- User Stats Pill -->
+        <div class="user-profile-pill">
+          <div class="avatar-circle">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div class="profile-details">
+            <span class="user-pill-name" id="user-display-name">Warrior</span>
+            <span class="user-pill-level" id="user-display-level">Level 1</span>
+          </div>
+          <button id="logout-btn" class="logout-btn" title="Log Out">
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid Dashboard Content -->
+    <main class="dashboard-grid">
+
+      <!-- COLUMN -0.5: PARENT BLESSING CONTAINER -->
+      <div id="parent-message-container" style="grid-column: span 12; width: 100%;"></div>
+
+      <!-- COLUMN 0: THE GOAL TARGET (Full Width Distraction Shield Card) -->
+      <div class="grid-card boss-encounter-card">
+        <div class="boss-arena-header">
+          <span class="badge badge-danger blink-badge"><i class="fa-solid fa-shield-halved"></i> DISTRACTION SHIELD
+            ACTIVE</span>
+          <span id="boss-level-badge" class="badge badge-accent">STAGE 1 GOAL TARGET</span>
+        </div>
+        <div class="boss-layout">
+          <!-- Boss Visual Panel -->
+          <div class="boss-visual">
+            <div class="boss-avatar-wrapper">
+              <i class="fa-solid fa-hourglass-half boss-monster-icon" id="boss-graphic"></i>
+              <div class="slash-overlay hidden" id="boss-slash"><i class="fa-solid fa-burst"></i></div>
+            </div>
+            <div class="boss-details">
+              <h3 id="boss-name">Distraction Shield (Procrastination)</h3>
+              <p class="boss-status" id="boss-status">Distraction is building up! Complete goals or Pomodoros to
+                strengthen your focus!</p>
+            </div>
+          </div>
+          <!-- Boss HP bar -->
+          <div class="boss-stats-panel">
+            <div class="boss-hp-labels">
+              <span>Shield Integrity</span>
+              <span id="boss-hp-text">100 / 100 HP</span>
+            </div>
+            <div class="boss-hp-track">
+              <div class="boss-hp-fill" id="boss-hp-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+          <!-- Combat Feed Log -->
+          <div class="combat-feed">
+            <div class="feed-title"><i class="fa-solid fa-receipt"></i> Activity Logs:</div>
+            <div class="feed-logs" id="combat-logs">
+              <div class="combat-log system">Goal tracking started. Maintain your targets to claim reward coins and
+                protect your energy!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 1: STREAK & LEVEL STATS -->
+      <div class="grid-card stats-overview-card">
+        <div class="level-badge-container">
+          <div class="circular-progress-level">
+            <svg class="progress-ring-level" width="120" height="120">
+              <circle class="progress-ring-circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="8"
+                fill="transparent" r="50" cx="60" cy="60" />
+              <circle id="level-progress-ring" class="progress-ring-circle-val" stroke="url(#levelGradient)"
+                stroke-width="8" fill="transparent" r="50" cx="60" cy="60" stroke-dasharray="314.16"
+                stroke-dashoffset="314.16" />
+              <defs>
+                <linearGradient id="levelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#06b6d4" />
+                  <stop offset="100%" stop-color="#8b5cf6" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="level-number-display">
+              <span class="label">LEVEL</span>
+              <span id="stat-level" class="value">1</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-stats-row">
+          <div class="quick-stat-box">
+            <div class="icon-circle xp-color">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div class="stat-text">
+              <span class="stat-num" id="stat-xp">0</span>
+              <span class="stat-label">Total XP</span>
+            </div>
+          </div>
+          <div class="quick-stat-box">
+            <div class="icon-circle rank-color">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div class="stat-text">
+              <span class="stat-num" id="stat-rank">#5</span>
+              <span class="stat-label">Rank</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- XP progress bar -->
+        <div class="xp-progress-bar-wrapper">
+          <div class="xp-labels">
+            <span id="xp-current-range">0 / 150 XP</span>
+            <span class="xp-percentage-label" id="xp-percent">0% to Level Up</span>
+          </div>
+          <div class="xp-track">
+            <div class="xp-fill animate-width" id="xp-fill-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 2: DAILY CHECK-IN & STREAK BATTLE WIDGET -->
+      <div class="grid-card streak-checkin-card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-calendar-check active-flame"></i> Daily Consistency</h3>
+          <span class="badge badge-success" id="streak-status-badge">Active</span>
+        </div>
+
+        <div class="streak-flame-display">
+          <div class="flame-outer">
+            <i class="fa-solid fa-fire animated-flame" id="flame-graphic"></i>
+            <span class="streak-number" id="stat-streak">0</span>
+          </div>
+          <p class="streak-tagline" id="streak-tagline">Start your streak today!</p>
+        </div>
+
+        <!-- Streak Freezes -->
+        <div class="streak-freezes-container">
+          <div class="freeze-header">
+            <span>Streak Freezes Remaining</span>
+            <span class="freeze-count-label" id="freeze-count">3 / 3</span>
+          </div>
+          <div class="freeze-slots" id="freeze-slots">
+            <div class="freeze-slot active" id="slot-1"><i class="fa-solid fa-snowflake"></i></div>
+            <div class="freeze-slot active" id="slot-2"><i class="fa-solid fa-snowflake"></i></div>
+            <div class="freeze-slot active" id="slot-3"><i class="fa-solid fa-snowflake"></i></div>
+          </div>
+          <p class="freeze-help">Freezes automatically deploy to protect your streak if you miss a study day!</p>
+        </div>
+
+        <!-- Interactive Action Button -->
+        <button id="check-in-btn" class="btn btn-action btn-block btn-glow btn-lg">
+          <i class="fa-solid fa-calendar-check"></i> <span>Daily Check-In (+10 XP)</span>
+        </button>
+        <p class="check-in-timer-desc" id="check-in-time-desc">Next check-in window opens tomorrow.</p>
+      </div>
+
+      <!-- COLUMN 3: POMODORO FOCUS TIMER -->
+      <div class="grid-card pomodoro-card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-hourglass-start"></i> Personal Study Desk</h3>
+          <div class="timer-mode-selector">
+            <button class="mode-btn active" id="mode-focus" onclick="setTimerMode('focus')">Focus</button>
+            <button class="mode-btn" id="mode-break" onclick="setTimerMode('break')">Break</button>
+          </div>
+        </div>
+
+        <!-- Custom Focus Time Duration Input -->
+        <div class="custom-timer-duration-wrapper">
+          <label for="custom-duration-input"><i class="fa-solid fa-hourglass-half"></i> Focus Time:</label>
+          <div class="custom-duration-selector-row">
+            <input type="number" id="custom-duration-input" min="1" max="180" value="25" class="custom-duration-input">
+            <span class="mins-suffix">mins</span>
+          </div>
+        </div>
+
+        <div class="timer-display-wrapper">
+          <div class="circular-progress-timer">
+            <svg class="progress-ring-timer" width="220" height="220">
+              <circle class="progress-ring-circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="12"
+                fill="transparent" r="95" cx="110" cy="110" />
+              <circle id="timer-progress-ring" class="progress-ring-circle-val" stroke="url(#timerGradient)"
+                stroke-width="12" fill="transparent" r="95" cx="110" cy="110" stroke-dasharray="596.9"
+                stroke-dashoffset="0" />
+              <defs>
+                <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ec4899" />
+                  <stop offset="50%" stop-color="#a855f7" />
+                  <stop offset="100%" stop-color="#6366f1" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="timer-digits-display">
+              <span id="timer-time" class="timer-clock animate-pulse-idle">25:00</span>
+              <span id="timer-status-text" class="timer-label">Ready to Focus</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timer-controls-row">
+          <button id="timer-start-btn" class="btn btn-circle btn-primary" title="Start Focus Session">
+            <i class="fa-solid fa-play"></i>
+          </button>
+          <button id="timer-pause-btn" class="btn btn-circle btn-secondary hidden" title="Pause Session">
+            <i class="fa-solid fa-pause"></i>
+          </button>
+          <button id="timer-reset-btn" class="btn btn-circle btn-danger" title="Reset Session">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+        <div class="timer-reward-info">
+          <i class="fa-solid fa-award"></i> Complete to earn <strong>+25 XP</strong> & <strong>+20 GP</strong>
+        </div>
+
+        <!-- Focus Soundscape Generator (Web Audio API Synthesized) -->
+        <div class="focus-soundscape-container">
+          <label for="soundscape-select"><i class="fa-solid fa-headphones"></i> Ambient Focus Sound:</label>
+          <select id="soundscape-select" class="soundscape-select">
+            <option value="none">🔇 Silent Focus</option>
+            <option value="white-noise">💨 Solar Wind (White Noise)</option>
+            <option value="rain">🌧️ Synthesized Rain</option>
+            <option value="ocean">🌊 Deep Ocean Waves</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- COLUMN 3.5: SYLLABUS DICE DUEL -->
+      <div class="grid-card dice-duel-card" id="dice-duel-card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-shuffle"></i> Syllabus Smart Randomizer</h3>
+          <span class="badge badge-accent"><i class="fa-solid fa-graduation-cap"></i> B.Tech 1st Year</span>
+        </div>
+        <p class="duel-desc">Roll the Syllabus Randomizer to select a random revision topic based on your B.Tech
+          engineering branch. Complete a focused 10-question test within 60 minutes to evaluate your knowledge and claim
+          reward coins!</p>
+
+        <!-- Screen 1: Roll state -->
+        <div id="duel-roll-screen" class="duel-screen">
+          <div class="visual-dice-wrapper">
+            <div id="visual-dice" class="visual-dice">
+              <div class="dice-face face-1">
+                <div class="dot dot-center"></div>
+              </div>
+              <div class="dice-face face-2">
+                <div class="dot dot-tl"></div>
+                <div class="dot dot-br"></div>
+              </div>
+              <div class="dice-face face-3">
+                <div class="dot dot-tl"></div>
+                <div class="dot dot-center"></div>
+                <div class="dot dot-br"></div>
+              </div>
+              <div class="dice-face face-4">
+                <div class="dot dot-tl"></div>
+                <div class="dot dot-tr"></div>
+                <div class="dot dot-bl"></div>
+                <div class="dot dot-br"></div>
+              </div>
+              <div class="dice-face face-5">
+                <div class="dot dot-tl"></div>
+                <div class="dot dot-tr"></div>
+                <div class="dot dot-center"></div>
+                <div class="dot dot-bl"></div>
+                <div class="dot dot-br"></div>
+              </div>
+              <div class="dice-face face-6">
+                <div class="dot dot-tl"></div>
+                <div class="dot dot-tr"></div>
+                <div class="dot dot-ml"></div>
+                <div class="dot dot-mr"></div>
+                <div class="dot dot-bl"></div>
+                <div class="dot dot-br"></div>
+              </div>
+            </div>
+          </div>
+          <button id="roll-dice-btn" class="btn btn-secondary btn-block btn-glow">
+            <span>Roll Syllabus Randomizer</span> <i class="fa-solid fa-dice"></i>
+          </button>
+        </div>
+
+        <!-- Screen 2: Topic Selected & Start Challenge -->
+        <div id="duel-topic-screen" class="duel-screen hidden">
+          <div class="topic-reveal-card">
+            <span class="topic-subject-badge" id="duel-revealed-subject">Engineering Physics</span>
+            <h4 id="duel-revealed-topic">Unit IV: Quantum Mechanics</h4>
+            <p class="topic-instruction">📝 Take a few minutes to revise this topic in your notes. Once prepared, start
+              the 60-minute evaluation challenge to test your skills against simulated peer scores!</p>
+          </div>
+          <div class="topic-actions-row">
+            <button id="start-duel-test-btn" class="btn btn-primary btn-glow">
+              <span>Start 60-Min Challenge</span> <i class="fa-solid fa-graduation-cap"></i>
+            </button>
+            <button id="reroll-dice-btn" class="btn btn-outline btn-sm">
+              <span>Reroll (-10 GP)</span> <i class="fa-solid fa-rotate-left"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Screen 3: Active Test with MCQs and Countdown -->
+        <div id="duel-test-screen" class="duel-screen hidden">
+          <div class="test-header-row">
+            <div class="timer-countdown-pill" id="duel-timer-pill">
+              <i class="fa-solid fa-clock"></i> <span id="duel-timer-clock">60:00</span>
+            </div>
+            <div class="question-progress-indicator" id="duel-progress-indicator">
+              Question 1 of 10
+            </div>
+          </div>
+
+          <!-- MCQ Area -->
+          <div id="duel-mcq-container" class="mcq-container">
+            <!-- Dynamic Question and options injected here by JS -->
+          </div>
+
+          <div class="test-actions-row">
+            <button id="prev-mcq-btn" class="btn btn-outline btn-sm" disabled>
+              <i class="fa-solid fa-arrow-left"></i> Previous
+            </button>
+            <button id="next-mcq-btn" class="btn btn-primary btn-sm">
+              Next <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button id="submit-mcq-btn" class="btn btn-success btn-sm hidden">
+              Submit Challenge <i class="fa-solid fa-skull"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Screen 4: Results and Rival Leaderboard -->
+        <div id="duel-results-screen" class="duel-screen hidden">
+          <div class="duel-outcome-header" id="duel-outcome-header">
+            <div class="outcome-trophy"><i class="fa-solid fa-trophy text-gold"></i></div>
+            <h4 id="duel-outcome-title">VICTORY!</h4>
+            <p id="duel-outcome-desc">You scored 9/10 and secured the top placement!</p>
+          </div>
+
+          <div class="duel-scores-table">
+            <div class="table-title"><i class="fa-solid fa-ranking-star"></i> Duel Placements:</div>
+            <div class="duel-rivals-list" id="duel-rivals-list">
+              <!-- Dynamically populated scores with user highlighted -->
+            </div>
+          </div>
+
+          <div class="duel-rewards-summary" id="duel-rewards-summary">
+            <!-- Reward badges -->
+          </div>
+
+          <button id="finish-duel-btn" class="btn btn-accent btn-block">
+            <span>Claim Rewards & Continue</span> <i class="fa-solid fa-circle-check"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- COLUMN 6: QUEST LOG & RPG TASK BOARD -->
+      <div class="grid-card quest-board-card" style="grid-column: span 12;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-list-check"></i> B.Tech Goals Planner</h3>
+          <button id="add-quest-btn" class="btn btn-outline btn-accent btn-sm" onclick="window.toggleQuestModal(true)">
+            <i class="fa-solid fa-plus"></i> Add Goal
+          </button>
+        </div>
+        <p class="quest-board-desc">Complete your real-world academic tasks to strengthen your weekly distraction
+          shield, earning reward points and experience!</p>
+
+        <div class="quests-container" id="quests-container">
+          <!-- Active Quests are populated here by JavaScript -->
+          <div class="empty-quests-message">
+            <i class="fa-solid fa-list"></i> No active goals. Click "Add Goal" to begin!
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 8: ANALYTICS & SVG CHARTS -->
+      <div class="grid-card analytics-card" style="grid-column: span 12;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-chart-line"></i> Focus Statistics</h3>
+          <span class="badge badge-accent">Interactive Chart</span>
+        </div>
+        <p class="chart-desc">Tracks your total focus time and daily performance history.</p>
+
+        <div class="chart-display-container">
+          <!-- Premium SVG Chart -->
+          <svg class="analytics-svg-chart" id="analytics-svg-chart" viewBox="0 0 300 120" width="100%" height="100%">
+            <!-- Grid Lines -->
+            <line x1="20" y1="20" x2="280" y2="20" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3" />
+            <line x1="20" y1="50" x2="280" y2="50" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3" />
+            <line x1="20" y1="80" x2="280" y2="80" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3" />
+            <line x1="20" y1="100" x2="280" y2="100" stroke="rgba(255,255,255,0.1)" />
+
+            <!-- Dynamic Path will be injected here by Javascript -->
+            <path id="chart-path" d="" fill="none" stroke="url(#chartGradient)" stroke-width="3"
+              stroke-linecap="round" />
+            <g id="chart-points"></g>
+            <g id="chart-labels"></g>
+
+            <!-- Defs -->
+            <defs>
+              <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#06b6d4" />
+                <stop offset="100%" stop-color="#a855f7" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="chart-legend">
+          <span>📅 Last 7 Days Performance</span>
+          <strong id="total-focus-minutes-display">0 focused mins</strong>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>&copy; 2026 Study Streak Battle. Crafted with passion for maximum productivity.</p>
+      <p style="margin-top: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.35);">Created by <strong style="color: rgba(255,255,255,0.55);">Shaurya Hindocha</strong>, RIT Roorkee</p>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px;">
+        <a href="https://www.instagram.com/shaurya._.2409_/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#e1306c'; this.style.borderColor='rgba(225,48,108,0.4)'; this.style.background='rgba(225,48,108,0.08)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-instagram"></i> Instagram</a>
+        <a href="https://www.linkedin.com/in/shaurya-hindocha-47961b380/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#0a66c2'; this.style.borderColor='rgba(10,102,194,0.4)'; this.style.background='rgba(10,102,194,0.08)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+        <a href="https://x.com/shaurya240907" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;" onmouseover="this.style.color='#ffffff'; this.style.borderColor='rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.07)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';"><i class="fa-brands fa-x-twitter"></i> Twitter / X</a>
+      </div>
+    </footer>
+  </section>
+
+  <!-- Hidden Quest Spawner Dialog -->
+  <div id="quest-spawner-modal" class="quest-modal hidden">
+    <div class="quest-modal-content">
+      <h4><i class="fa-solid fa-calendar-plus"></i> Add Study Goal</h4>
+      <form id="quest-spawn-form">
+        <div class="form-group">
+          <label for="quest-title-input">Goal Objective</label>
+          <input type="text" id="quest-title-input" required
+            placeholder="e.g., Read Unit 2 of Engineering Physics notes..." maxlength="50">
+        </div>
+        <div class="form-group">
+          <label for="quest-rarity-select">Goal Priority</label>
+          <select id="quest-rarity-select">
+            <option value="common">🟢 Standard Priority (+10 XP & 10 GP)</option>
+            <option value="rare">🔵 Important Goal (+20 XP & 20 GP)</option>
+            <option value="epic">🟣 High Priority (+40 XP & 40 GP & double shield strength)</option>
+            <option value="legendary">🟡 Critical Target (+80 XP & 80 GP & triple shield strength)</option>
+          </select>
+        </div>
+        <div class="modal-buttons">
+          <button type="submit" class="btn btn-primary btn-sm">Add Goal</button>
+          <button type="button" class="btn btn-outline btn-danger btn-sm"
+            onclick="window.toggleQuestModal(false)">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dedicated Companion Care Pop-up Modal -->
+  <div id="pet-care-popup-modal" class="settings-modal hidden">
+    <div class="settings-modal-content"
+      style="max-width: 420px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+      <div class="settings-modal-header"
+        style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center;">
+        <button onclick="window.showCompanionCarePopup(false); window.toggleSettingsModal(true);"
+          title="Back to Settings"
+          style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: var(--transition-smooth); margin-right: 8px;">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h4
+          style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: #fff; flex-grow: 1;">
+          <i class="fa-solid fa-cookie-bite" style="color: var(--primary-color);"></i> Companion Care Station
+        </h4>
+        <button class="settings-close-btn" onclick="window.showCompanionCarePopup(false)" title="Close Care Station">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Pet Avatar & Stats Row -->
+        <div
+          style="display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="pet-avatar-wrapper" id="pet-avatar-wrapper">
+              <i class="fa-solid fa-cat pet-avatar-icon" id="pet-avatar-icon"></i>
+            </div>
+            <div>
+              <h4 id="pet-display-name"
+                style="font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 2px; margin-top: 0;">
+                Focus Pet</h4>
+              <div id="pet-display-level"
+                style="font-size: 0.72rem; color: var(--cyan-color); font-weight: 600; text-transform: uppercase;">
+                Companion Level 1</div>
+            </div>
+          </div>
+          <span id="pet-mood-tag" class="pet-mood-badge">😊 Energetic</span>
+        </div>
+
+        <!-- Progress and Status Bars -->
+        <div
+          style="display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--border-radius-md); border: 1px solid var(--border-color);">
+          <!-- Pet HP Bar -->
+          <div class="pet-progress-row">
+            <span style="width: 50px;">Health:</span>
+            <div class="pet-progress-track">
+              <div id="pet-hp-fill" class="pet-progress-fill" style="width: 100%; background: var(--success-gradient);">
+              </div>
+            </div>
+            <strong id="pet-hp-text" style="width: 50px; text-align: right;">100 / 100</strong>
+          </div>
+
+          <!-- Pet Happiness Bar -->
+          <div class="pet-progress-row">
+            <span style="width: 50px;">Happiness:</span>
+            <div class="pet-progress-track">
+              <div id="pet-happiness-fill" class="pet-progress-fill"
+                style="width: 100%; background: linear-gradient(90deg, #ec4899 0%, #f472b6 100%);"></div>
+            </div>
+            <strong id="pet-happiness-text" style="width: 50px; text-align: right;">100%</strong>
+          </div>
+
+          <!-- Pet XP Bar -->
+          <div class="pet-progress-row">
+            <span style="width: 50px;">XP Progress:</span>
+            <div class="pet-progress-track">
+              <div id="pet-xp-fill" class="pet-progress-fill" style="width: 0%; background: var(--primary-gradient);">
+              </div>
+            </div>
+            <strong id="pet-xp-text" style="width: 50px; text-align: right;">0%</strong>
+          </div>
+        </div>
+
+        <!-- Care Actions Row -->
+        <div style="display: flex; gap: 10px;">
+          <button id="pet-feed-btn" onclick="feedCompanionPet()" class="btn btn-secondary btn-sm"
+            style="flex: 1; padding: 0.6rem; font-size: 0.82rem; background: var(--flame-gradient); border: none; cursor: pointer; border-radius: var(--border-radius-sm);">
+            <i class="fa-solid fa-cookie-bite"></i> Feed (15 GP)
+          </button>
+          <button id="pet-play-btn" onclick="playCompanionPet()" class="btn btn-outline btn-sm"
+            style="flex: 1; padding: 0.6rem; font-size: 0.82rem; border-color: var(--primary-color); color: var(--primary-color); cursor: pointer; background: transparent; border-radius: var(--border-radius-sm);">
+            <i class="fa-solid fa-gamepad"></i> Play (10 GP)
+          </button>
+          <button id="pet-revive-btn" onclick="reviveCompanionPet()" class="btn btn-accent btn-sm hidden"
+            style="flex: 1; padding: 0.6rem; font-size: 0.82rem; background: var(--secondary-gradient); border: none; cursor: pointer; border-radius: var(--border-radius-sm);">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Revive (100 GP)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Appearance Customizer Pop-up Modal -->
+  <div id="appearance-popup-modal" class="settings-modal hidden">
+    <div class="settings-modal-content"
+      style="max-width: 480px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+      <div class="settings-modal-header"
+        style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center;">
+        <button onclick="window.showAppearancePopup(false); window.toggleSettingsModal(true);" title="Back to Settings"
+          style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: var(--transition-smooth); margin-right: 8px;">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h4
+          style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: #fff; flex-grow: 1;">
+          <i class="fa-solid fa-palette" style="color: var(--primary-color);"></i> Appearance Customizer
+        </h4>
+        <button class="settings-close-btn" onclick="window.showAppearancePopup(false)" title="Close Customizer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="settings-tab-desc">Redeem earned GP study points to equip polished visual dashboard themes and purchase
+        streak freezes.</p>
+
+      <!-- Identity Keys Box for Parents -->
+      <div class="settings-identity-box"
+        style="display: flex; flex-wrap: wrap; gap: 1rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1.1rem; margin-bottom: 1.5rem; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-id-card text-indigo" style="color: var(--primary-color); font-size: 1.25rem;"></i>
+          <div>
+            <h5 style="font-size: 0.82rem; font-weight: 700; margin-bottom: 2px;">Your Academic Profile Keys</h5>
+            <p style="font-size: 0.68rem; color: var(--text-muted);">Share your Parent ID so your parents can access
+              your progress report.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.6rem; font-size: 0.76rem;">
+          <div
+            style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-weight: 600;">
+            Student ID: <span id="settings-student-id"
+              style="color: var(--primary-color); font-weight: 700;">SSB0000</span>
+          </div>
+          <div
+            style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-weight: 600;">
+            Parent ID: <span id="settings-parent-id"
+              style="color: var(--accent-color); font-weight: 700;">SSBP0000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="shop-items-grid">
+        <!-- Buy Streak Freeze -->
+        <div class="shop-item">
+          <div class="shop-item-info">
+            <h5>❄️ Streak Freeze Protection</h5>
+            <p>Protects streak from resetting on a missed day (max 5).</p>
+          </div>
+          <button class="btn btn-sm btn-accent buy-shop-item-btn" id="buy-freeze-btn">
+            <span>75 GP</span>
+          </button>
+        </div>
+        <!-- Original Slate Theme -->
+        <div class="shop-item" id="shop-item-theme-default">
+          <div class="shop-item-info">
+            <h5>🎓 Original Slate Theme</h5>
+            <p>Equip the default professional SaaS appearance.</p>
+          </div>
+          <button class="btn btn-sm btn-outline buy-shop-item-btn" id="buy-theme-default-btn">
+            <span>EQUIP</span>
+          </button>
+        </div>
+        <!-- Cyberpunk neon theme -->
+        <div class="shop-item" id="shop-item-theme-cyber">
+          <div class="shop-item-info">
+            <h5>🌃 Cyberpunk Neon Grid</h5>
+            <p>Equip glowing pink-purple cosmetics.</p>
+          </div>
+          <button class="btn btn-sm btn-accent buy-shop-item-btn" id="buy-theme-cyber-btn">
+            <span>100 GP</span>
+          </button>
+        </div>
+        <!-- Emerald Forest theme -->
+        <div class="shop-item" id="shop-item-theme-forest">
+          <div class="shop-item-info">
+            <h5>🌲 Emerald Forest Green</h5>
+            <p>Equip relaxing emerald-teal cosmetics.</p>
+          </div>
+          <button class="btn btn-sm btn-accent buy-shop-item-btn" id="buy-theme-forest-btn">
+            <span>150 GP</span>
+          </button>
+        </div>
+        <!-- Solar Eclipse theme -->
+        <div class="shop-item" id="shop-item-theme-solar">
+          <div class="shop-item-info">
+            <h5>☀️ Solar Eclipse Orange</h5>
+            <p>Equip high-energy solar-flare cosmetics.</p>
+          </div>
+          <button class="btn btn-sm btn-accent buy-shop-item-btn" id="buy-theme-solar-btn">
+            <span>200 GP</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Group Study Pop-up Modal -->
+  <div id="studyroom-popup-modal" class="settings-modal hidden">
+    <div class="settings-modal-content"
+      style="max-width: 500px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+      <div class="settings-modal-header"
+        style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center;">
+        <button onclick="window.showStudyroomPopup(false); window.toggleSettingsModal(true);" title="Back to Settings"
+          style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: var(--transition-smooth); margin-right: 8px;">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h4
+          style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: #fff; flex-grow: 1;">
+          <i class="fa-solid fa-video" style="color: var(--secondary-color);"></i> Group Study Desk
+        </h4>
+        <button class="settings-close-btn" onclick="window.showStudyroomPopup(false)" title="Close Study Desk">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="room-lobby-state" class="room-lobby">
+        <p class="settings-tab-desc">Collaborate in real-time. Create or join a virtual branch study room with camera
+          and microphone access to study alongside your peers.</p>
+
+        <div class="room-action-card"
+          style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1.2rem; margin-bottom: 1rem; text-align: center;">
+          <h5 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;"><i class="fa-solid fa-plus text-indigo"
+              style="color: var(--primary-color);"></i> Host New Study Room</h5>
+          <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 12px;">Generate a unique room code to
+            invite your engineering classmates.</p>
+          <button id="create-room-btn" class="btn btn-primary btn-sm btn-block" onclick="window.hostStudyRoom()">
+            <span>Generate Room Code</span>
+          </button>
+        </div>
+
+        <div class="room-action-card"
+          style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1.2rem; text-align: center;">
+          <h5 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 6px;"><i
+              class="fa-solid fa-right-to-bracket text-secondary" style="color: var(--secondary-color);"></i> Join
+            Existing Room</h5>
+          <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 12px;">Enter the 6-character room code
+            shared by your peer group owner.</p>
+          <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+            <input type="text" id="room-code-input" placeholder="e.g. ST-983"
+              style="flex: 1; padding: 0.6rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.85rem; font-family: monospace; text-transform: uppercase;"
+              maxlength="8">
+            <button class="btn btn-outline btn-sm" onclick="window.joinStudyRoom()"
+              style="padding: 0.6rem 1rem;">Join</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Room Active State (WebRTC Webcam Mockup) -->
+      <div id="room-active-state" class="room-active hidden">
+        <div class="room-active-header"
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+          <div>
+            <span class="badge badge-success" style="font-size: 0.65rem; padding: 2px 6px;"><i
+                class="fa-solid fa-circle animate-pulse" style="font-size: 6px; color: #22c55e;"></i> CONNECTED</span>
+            <h5 style="font-size: 0.85rem; font-weight: 700; margin-top: 4px;" id="active-room-title">Room: STREAK-193
+            </h5>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="window.copyRoomCode()"
+            style="font-size: 0.7rem; padding: 4px 8px;" title="Copy Invite Code">
+            <i class="fa-solid fa-copy"></i> Copy Code
+          </button>
+        </div>
+
+        <!-- Participant Video Grid -->
+        <div class="room-video-grid">
+          <!-- local user feed -->
+          <div class="video-box user-feed" id="user-video-box">
+            <div class="video-placeholder" id="local-video-placeholder">
+              <div class="avatar-circle" style="width: 40px; height: 40px; font-size: 1.3rem;"><i
+                  class="fa-solid fa-user-graduate"></i></div>
+              <span class="placeholder-name">You (Camera Off)</span>
+            </div>
+            <video id="room-local-video" autoplay playsinline muted class="room-video-feed hidden"></video>
+            <div class="video-overlay-info">
+              <span class="participant-name">You (Host)</span>
+              <span class="mic-status-badge" id="local-mic-badge"><i class="fa-solid fa-microphone"></i></span>
+            </div>
+          </div>
+
+          <!-- peer 1 -->
+          <div class="video-box peer-feed">
+            <div class="video-placeholder">
+              <div class="avatar-circle"
+                style="width: 40px; height: 40px; font-size: 1.3rem; background: rgba(168, 85, 247, 0.1); color: #a855f7;">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+              <span class="placeholder-name">Sophia Sharma</span>
+            </div>
+            <div class="focusing-status-label"><i class="fa-solid fa-stopwatch animate-pulse"></i> Focus Desk</div>
+            <div class="video-overlay-info">
+              <span class="participant-name">Sophia Sharma</span>
+              <span class="mic-status-badge"><i class="fa-solid fa-microphone"></i></span>
+            </div>
+          </div>
+
+          <!-- peer 2 -->
+          <div class="video-box peer-feed">
+            <div class="video-placeholder">
+              <div class="avatar-circle"
+                style="width: 40px; height: 40px; font-size: 1.3rem; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+              <span class="placeholder-name">Marcus Goel</span>
+            </div>
+            <div class="focusing-status-label"><i class="fa-solid fa-book-open"></i> Syllabus Roll</div>
+            <div class="video-overlay-info">
+              <span class="participant-name">Marcus Goel</span>
+              <span class="mic-status-badge"><i class="fa-solid fa-microphone-slash"
+                  style="color: var(--danger-color);"></i></span>
+            </div>
+          </div>
+
+          <!-- peer 3 -->
+          <div class="video-box peer-feed">
+            <div class="video-placeholder">
+              <div class="avatar-circle"
+                style="width: 40px; height: 40px; font-size: 1.3rem; background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                <i class="fa-solid fa-user-graduate"></i>
+              </div>
+              <span class="placeholder-name">Ava Patel</span>
+            </div>
+            <div class="focusing-status-label"><i class="fa-solid fa-hourglass-half"></i> Break Time</div>
+            <div class="video-overlay-info">
+              <span class="participant-name">Ava Patel</span>
+              <span class="mic-status-badge"><i class="fa-solid fa-microphone"></i></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Room Call Controls -->
+        <div class="room-call-controls">
+          <button id="toggle-mic-btn" class="btn btn-outline btn-circle btn-sm active-mic"
+            onclick="window.toggleLocalMic()" title="Mute/Unmute Microphone">
+            <i class="fa-solid fa-microphone"></i>
+          </button>
+          <button id="toggle-cam-btn" class="btn btn-outline btn-circle btn-sm disabled-cam"
+            onclick="window.toggleLocalCam()" title="Turn Camera On/Off">
+            <i class="fa-solid fa-video-slash"></i>
+          </button>
+          <button id="leave-room-btn" class="btn btn-danger btn-circle btn-sm" onclick="window.leaveStudyRoom()"
+            title="Leave Study Room">
+            <i class="fa-solid fa-phone-slash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Developer Testing Pop-up Modal -->
+  <div id="dev-popup-modal" class="settings-modal hidden">
+    <div class="settings-modal-content"
+      style="max-width: 420px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+      <div class="settings-modal-header"
+        style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center;">
+        <button onclick="window.showDevPopup(false); window.toggleSettingsModal(true);" title="Back to Settings"
+          style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: var(--transition-smooth); margin-right: 8px;">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h4
+          style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: #fff; flex-grow: 1;">
+          <i class="fa-solid fa-gears" style="color: var(--danger-color);"></i> Developer Testing Desk
+        </h4>
+        <button class="settings-close-btn" onclick="window.showDevPopup(false)" title="Close Dev Desk">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="settings-tab-desc">Simulate study timelines and speed up Pomodoro timers to evaluate layout behaviors
+        instantly.</p>
+      <div class="sim-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button id="sim-day-btn" class="btn btn-outline btn-accent btn-block">
+          <i class="fa-solid fa-forward"></i> Sim Day
+        </button>
+        <button id="sim-skip-timer-btn" class="btn btn-outline btn-accent btn-block">
+          <i class="fa-solid fa-forward-step"></i> Fast Pomo
+        </button>
+        <button id="sim-skip-duel-btn" class="btn btn-outline btn-accent btn-block">
+          <i class="fa-solid fa-forward-step"></i> Fast Duel
+        </button>
+        <button id="reset-all-btn" class="btn btn-outline btn-danger btn-block">
+          <i class="fa-solid fa-trash-can"></i> Reset Profile
+        </button>
+      </div>
+
+      <div class="sim-status-log" style="margin-top: 1rem;">
+        <span class="log-title" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">Simulator
+          Logs:</span>
+        <div class="log-output" id="sim-log-output"
+          style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--border-radius-sm); font-family: monospace; font-size: 0.7rem; color: #34d399; line-height: 1.4; margin-top: 6px;">
+          System initialized. Ready to simulate focus desks!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Settings & Customizer Dialog -->
+  <div id="settings-spawner-modal" class="settings-modal hidden">
+    <div class="settings-modal-content" style="max-width: 400px;">
+      <div class="settings-modal-header"
+        style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin-bottom: 16px;">
+        <h4
+          style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0; color: #fff;">
+          <i class="fa-solid fa-sliders text-indigo" style="color: var(--primary-color);"></i> Preferences & Settings
+        </h4>
+        <button class="settings-close-btn" onclick="window.toggleSettingsModal(false)" title="Close Settings">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="settings-options-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 1rem;">
+        <!-- Option 1: Appearance Customizer -->
+        <div class="settings-option-item" onclick="window.showAppearancePopup(true)">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="option-icon-box" style="background: rgba(79, 70, 229, 0.1); color: var(--primary-color);">
+              <i class="fa-solid fa-palette"></i>
+            </div>
+            <span class="option-name">Appearance Customizer</span>
+          </div>
+          <i class="fa-solid fa-chevron-right option-chevron"></i>
+        </div>
+
+        <!-- Option 2: Group Study Desk -->
+        <div class="settings-option-item" onclick="window.location.href='studyroom.html'">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="option-icon-box" style="background: rgba(13, 148, 136, 0.1); color: var(--secondary-color);">
+              <i class="fa-solid fa-video"></i>
+            </div>
+            <span class="option-name">Group Study Desk</span>
+          </div>
+          <i class="fa-solid fa-chevron-right option-chevron"></i>
+        </div>
+
+        <!-- Option 3: Study Pet Care Station -->
+        <div class="settings-option-item" onclick="window.showCompanionCarePopup(true)">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="option-icon-box" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-color);">
+              <i class="fa-solid fa-paw"></i>
+            </div>
+            <span class="option-name">Study Pet Care Station</span>
+          </div>
+          <i class="fa-solid fa-chevron-right option-chevron"></i>
+        </div>
+
+        <!-- Option 4: Developer Testing Desk -->
+        <div class="settings-option-item" onclick="window.showDevPopup(true)">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="option-icon-box" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color);">
+              <i class="fa-solid fa-gears"></i>
+            </div>
+            <span class="option-name">Developer Testing Desk</span>
+          </div>
+          <i class="fa-solid fa-chevron-right option-chevron"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Study Companion Adoption Gate -->
+  <div id="pet-adoption-modal" class="pet-adoption-modal hidden">
+    <div class="adoption-modal-content">
+      <h2
+        style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 0.4rem; letter-spacing: -0.02em;">
+        Adopt Your B.Tech <span
+          style="background: var(--primary-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Study
+          Pet</span>
+      </h2>
+      <p
+        style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; max-width: 480px; margin: 0 auto 1.5rem;">
+        Choose a loyal companion whose well-being depends entirely on your study habits. They will help you clear
+        syllabus doubts and motivate you along your B.Tech journey!
+      </p>
+
+      <div class="pet-choice-grid">
+        <div class="pet-choice-card" onclick="selectAdoptPet('Focus Cat', this)">
+          <span class="pet-choice-badge">Sassy</span>
+          <div class="pet-choice-icon" style="color: #ec4899;"><i class="fa-solid fa-cat"></i></div>
+          <div class="pet-choice-name">Focus Cat</div>
+          <div class="pet-choice-desc">Sleepy but laser-focused. Meows in explanations!</div>
+        </div>
+        <div class="pet-choice-card" onclick="selectAdoptPet('Zen Panda', this)">
+          <span class="pet-choice-badge">Wise</span>
+          <div class="pet-choice-icon" style="color: #10b981;"><i class="fa-solid fa-paw"></i></div>
+          <div class="pet-choice-name">Zen Panda</div>
+          <div class="pet-choice-desc">Calm. Resolves doubts with peaceful philosophical analogies.</div>
+        </div>
+        <div class="pet-choice-card" onclick="selectAdoptPet('Knowledge Dragon', this)">
+          <span class="pet-choice-badge">Proud</span>
+          <div class="pet-choice-icon" style="color: #f59e0b;"><i class="fa-solid fa-dragon"></i></div>
+          <div class="pet-choice-name">Knowledge Dragon</div>
+          <div class="pet-choice-desc">Grand & detailed. Explains complex math in a proud roar!</div>
+        </div>
+        <div class="pet-choice-card" onclick="selectAdoptPet('Smart Fox', this)">
+          <span class="pet-choice-badge">Clever</span>
+          <div class="pet-choice-icon" style="color: #ea580c;"><i class="fa-solid fa-otter"></i></div>
+          <div class="pet-choice-name">Smart Fox</div>
+          <div class="pet-choice-desc">Quick. Unlocks clever shortcuts, tricks & exam cheat-codes.</div>
+        </div>
+        <div class="pet-choice-card" onclick="selectAdoptPet('Chill Penguin', this)">
+          <span class="pet-choice-badge">Cool</span>
+          <div class="pet-choice-icon" style="color: #0284c7;"><i class="fa-solid fa-snowflake"></i></div>
+          <div class="pet-choice-name">Chill Penguin</div>
+          <div class="pet-choice-desc">Laid-back. Simplifies dry logic with cool, easy slang.</div>
+        </div>
+        <div class="pet-choice-card" onclick="selectAdoptPet('Pixel Robot', this)">
+          <span class="pet-choice-badge">Logic</span>
+          <div class="pet-choice-icon" style="color: #8b5cf6;"><i class="fa-solid fa-robot"></i></div>
+          <div class="pet-choice-name">Pixel Robot</div>
+          <div class="pet-choice-desc">Systematic & clean. Lists code & processes variable equations.</div>
+        </div>
+      </div>
+
+      <div class="form-group" style="max-width: 320px; margin: 1.5rem auto 1rem;">
+        <label for="adopt-pet-name-input"><i class="fa-solid fa-pen-fancy"></i> Name Your Companion</label>
+        <input type="text" id="adopt-pet-name-input" placeholder="e.g. Luna, Bao, Sly..." maxlength="12"
+          style="text-align: center;">
+      </div>
+
+      <button id="adopt-pet-btn" class="btn btn-primary btn-glow"
+        style="max-width: 240px; margin: 0 auto; display: block; width: 100%; padding: 0.8rem;"
+        onclick="confirmPetAdoption()">
+        <i class="fa-solid fa-circle-check"></i> Adopt &amp; Bind Soul
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       FLOATING COMPANION DOUBT ASSISTANT WIDGET
+       ══════════════════════════════════════════ -->
+  <!-- Floating Trigger Button -->
+  <div id="pet-chat-floating-trigger" class="floating-chat-trigger" onclick="window.toggleFloatingChat(event)"
+    title="Open Study Companion AI">
+    <i class="fa-solid fa-comments"></i>
+    <!-- Pulser Badge -->
+    <span
+      style="position: absolute; top: 0; right: 0; width: 12px; height: 12px; background: #22c55e; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 8px #22c55e;"></span>
+  </div>
+
+  <!-- Floating Chat Card Widget -->
+  <div id="pet-chat-floating-card" class="floating-chat-card hidden">
+    <!-- Header styled exactly like helpdesk screenshot -->
+    <div class="floating-chat-header">
+      <div class="floating-chat-title">
+        <div class="floating-chat-pet-icon" id="floating-chat-pet-icon">
+          <i class="fa-solid fa-cat"></i>
+        </div>
+        <div class="floating-chat-info">
+          <h3 id="floating-chat-pet-title">Companion Doubt Assistant</h3>
+          <span><i class="fa-solid fa-circle"
+              style="color: #22c55e; font-size: 0.4rem; animation: pulseIndicator 1.5s infinite alternate;"></i> <span
+              id="floating-chat-pet-status">Luna is Sleepy</span></span>
+        </div>
+      </div>
+      <div class="floating-chat-header-actions">
+        <!-- Three-dots chat menu container -->
+        <div class="chat-menu-container" style="position: relative; display: inline-block;">
+          <button onclick="window.toggleChatMenu(event)" class="floating-chat-btn" title="Chat Options" type="button">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+          <!-- Popup Dropdown Menu -->
+          <div id="chat-dropdown-menu" class="hidden"
+            style="position: absolute; right: 0; top: 100%; margin-top: 4px; background: #1e293b; border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 50; width: 120px;">
+            <button onclick="window.clearChatHistory(event)"
+              style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; font-size: 0.75rem; color: #f87171; background: transparent; border: none; cursor: pointer; text-align: left; transition: background 0.2s;"
+              onmouseover="this.style.background='rgba(255,255,255,0.05)'"
+              onmouseout="this.style.background='transparent'">
+              <i class="fa-solid fa-trash-can"></i> Clear Chat
+            </button>
+          </div>
+        </div>
+        <button class="floating-chat-btn btn-close" onclick="window.toggleFloatingChat(event)" title="Minimize Chat"
+          type="button">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat history scrollbox -->
+    <div id="pet-chat-box" class="floating-chat-box chat-history-box"
+      style="margin: 0; border: none; border-radius: 0; background: transparent;">
+      <!-- Dynamically populated bubble exchange history -->
+    </div>
+
+    <!-- Hidden File Input -->
+    <input type="file" id="pet-chat-file-input" accept="image/*" class="hidden"
+      onchange="window.handlePetChatAttachment(event)">
+
+    <!-- Attachment Preview Bar -->
+    <div id="pet-chat-attachment-preview" class="hidden"
+      style="margin: 0 10px 8px; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: var(--border-radius-sm); border: 1px dashed var(--border-color);">
+      <div id="attachment-preview-img-container"
+        style="width: 32px; height: 32px; border-radius: 4px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
+        <img id="attachment-preview-img" src="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </div>
+      <div
+        style="flex: 1; font-size: 0.75rem; color: var(--text-muted); text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"
+        id="attachment-preview-name">image.png</div>
+      <button onclick="window.clearPetChatAttachment()" class="btn btn-sm btn-outline"
+        style="padding: 2px 6px; font-size: 0.7rem; border-color: rgba(239,68,68,0.4); color: #f87171; background: transparent; cursor: pointer;"
+        type="button">
+        <i class="fa-solid fa-trash-can"></i> Remove
+      </button>
+    </div>
+
+    <!-- Input Footer styled cleanly like screenshot -->
+    <div class="floating-chat-footer">
+      <div
+        style="display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 14px;">
+        <!-- Attachment Button Trigger -->
+        <button onclick="window.triggerPetChatAttachment()" class="floating-chat-btn"
+          style="padding: 6px; color: var(--text-muted); cursor: pointer;" title="Attach Question Image" type="button">
+          <i class="fa-solid fa-image"></i>
+        </button>
+
+        <input type="text" id="pet-chat-input" placeholder="Ask an engineering doubt... e.g. What is malloc?"
+          style="flex: 1; padding: 0.5rem 0.2rem; border: none; background: transparent; color: #fff; font-size: 0.8rem; outline: none;"
+          onkeydown="handlePetChatKeydown(event)">
+
+        <button onclick="sendPetChatMessage()" class="floating-chat-btn"
+          style="padding: 6px; color: var(--primary-color);" title="Send Message" type="button">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Files -->
+  <script src="../backend/js/auth.js"></script>
+  <script src="../backend/js/timer.js"></script>
+  <script src="../backend/js/dashboard.js"></script>
+</body>
+
+</html>

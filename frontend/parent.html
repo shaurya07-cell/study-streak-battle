@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyStreak — Parent Portal</title>
+  <meta name="description" content="Securely monitor and track your child's academic revision consistency and Pomodoro study milestones.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Parent Portal Exclusive Styles ── */
+    :root {
+      --parent-accent: #818cf8;
+      --parent-accent-glow: rgba(129, 140, 248, 0.2);
+    }
+
+    /* ─── Login Gate ─── */
+    #parent-gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-color);
+      position: relative;
+    }
+    #parent-gate::before {
+      content: '';
+      position: fixed;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .gate-card {
+      background: var(--card-bg-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.8rem 2.4rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.02);
+      text-align: center;
+      z-index: 2;
+    }
+    .gate-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.5; }
+    .gate-input {
+      width: 100%; padding: 0.9rem 1.1rem;
+      border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03); color: #fff;
+      font-family: var(--font-family-body); font-size: 0.9rem;
+      margin-bottom: 1rem; box-sizing: border-box;
+      transition: border-color 0.2s;
+      text-align: center;
+    }
+    .gate-input:focus { outline: none; border-color: var(--parent-accent); }
+    .gate-btn {
+      width: 100%; padding: 0.9rem;
+      background: var(--primary-gradient);
+      border: none; border-radius: 12px;
+      color: #fff; font-weight: 700; font-size: 0.95rem;
+      cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+    .gate-btn:hover { opacity: 0.95; transform: translateY(-1px); }
+    .gate-error {
+      margin-top: 0.8rem; font-size: 0.8rem;
+      color: var(--danger-color); display: none;
+      align-items: center; justify-content: center; gap: 6px;
+    }
+
+    /* ─── Parent Dashboard ─── */
+    #parent-dashboard { display: none; min-height: 100vh; background-color: var(--bg-color); }
+
+    /* Parent Header */
+    .parent-header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 2rem;
+      height: 70px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+    .parent-header-left {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .parent-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem; font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .parent-badge {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 0.68rem; font-weight: 700;
+      color: #818cf8;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .parent-header-right { display: flex; align-items: center; gap: 16px; }
+    .monitoring-pill {
+      font-size: 0.8rem; color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-weight: 500;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .parent-logout-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 6px 14px;
+      color: var(--text-main); font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: background 0.2s;
+    }
+    .parent-logout-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+    /* Main Content */
+    .parent-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Stats Cards Row */
+    .parent-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .parent-stat-card {
+      background: var(--card-bg-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.4rem 1.6rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .parent-stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .psc-blue::after   { background: var(--primary-gradient); }
+    .psc-green::after  { background: var(--secondary-gradient); }
+    .psc-red::after    { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .psc-amber::after  { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+
+    .parent-stat-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .parent-stat-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem; font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .psc-blue .parent-stat-value   { color: #818cf8; }
+    .psc-green .parent-stat-value  { color: #34d399; }
+    .psc-red .parent-stat-value    { color: #f87171; }
+    .psc-amber .parent-stat-value  { color: #fbbf24; }
+    
+    .parent-stat-sub {
+      font-size: 0.72rem; color: var(--text-muted);
+    }
+
+    /* Grid Layout */
+    .parent-grid-two-col {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .parent-card {
+      background: var(--card-bg-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.6rem;
+      margin-bottom: 1.5rem;
+    }
+    .parent-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.8rem;
+      margin-bottom: 1.2rem;
+    }
+    .parent-card-title {
+      font-size: 1.05rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .parent-card-title i { color: #818cf8; }
+
+    /* Goal Items List */
+    .goal-list { display: flex; flex-direction: column; gap: 0.8rem; }
+    .goal-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 0.9rem 1.1rem;
+      background: rgba(255,255,255,0.015);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .goal-item:hover { background: rgba(255,255,255,0.03); }
+    .goal-status-checkbox {
+      font-size: 1.15rem; margin-top: 2px;
+    }
+    .goal-status-checkbox.checked { color: #10b981; }
+    .goal-status-checkbox.pending { color: var(--text-muted); opacity: 0.4; }
+    
+    .goal-text-block { flex: 1; }
+    .goal-name { font-size: 0.88rem; font-weight: 600; line-height: 1.4; margin-bottom: 2px; }
+    .goal-item.done-task .goal-name { text-decoration: line-through; color: var(--text-muted); }
+    
+    .goal-meta { display: flex; gap: 8px; align-items: center; font-size: 0.7rem; color: var(--text-muted); }
+    .badge-priority {
+      padding: 2px 8px; border-radius: 20px; font-weight: 600; text-transform: uppercase; font-size: 0.6rem;
+    }
+    .priority-standard { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+    .priority-high     { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+    .priority-critical { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+
+    /* Custom CSS Focus Chart */
+    .focus-chart-container {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      height: 150px; padding: 1.5rem 0.5rem 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 0.5rem;
+    }
+    .focus-bar-column {
+      display: flex; flex-direction: column; align-items: center;
+      width: 12%; gap: 6px;
+    }
+    .focus-bar-fill {
+      width: 100%; min-height: 4px; border-radius: 4px 4px 0 0;
+      background: var(--primary-gradient);
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+    .focus-bar-fill:hover::after {
+      content: attr(data-tooltip);
+      position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+      background: rgba(15,23,42,0.9); border: 1px solid var(--border-color);
+      color: #fff; font-size: 0.65rem; font-weight: 600;
+      padding: 3px 6px; border-radius: 6px; pointer-events: none;
+      white-space: nowrap; z-index: 10;
+    }
+    .focus-day-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+    /* Calendar Grid */
+    .checkin-calendar-row {
+      display: flex; gap: 0.4rem; justify-content: space-between; margin-top: 1rem;
+    }
+    .calendar-cell {
+      flex: 1; text-align: center;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 10px; padding: 0.6rem 0.2rem;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .calendar-cell.active-check {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    .cc-label { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .cc-icon { font-size: 0.9rem; }
+    .calendar-cell.active-check .cc-icon { color: #10b981; }
+    .calendar-cell:not(.active-check) .cc-icon { color: var(--text-muted); opacity: 0.2; }
+
+    /* Syllabus Test Performance */
+    .test-log { display: flex; flex-direction: column; gap: 0.6rem; }
+    .test-log-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.7rem 1rem; background: rgba(255,255,255,0.01);
+      border: 1px solid var(--border-color); border-radius: 10px;
+      font-size: 0.8rem;
+    }
+    .test-name-block { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .test-score { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95rem; }
+    .ts-excellent { color: #34d399; }
+    .ts-average   { color: #fbbf24; }
+    .ts-fail      { color: #f87171; }
+
+    /* Empty states */
+    .parent-empty-card {
+      text-align: center; padding: 3rem 1.5rem; color: var(--text-muted);
+    }
+    .parent-empty-card i { font-size: 2rem; margin-bottom: 0.8rem; opacity: 0.3; }
+    .parent-empty-card p { font-size: 0.8rem; }
+
+    @media (max-width: 990px) {
+      .parent-grid-two-col { grid-template-columns: 1fr; }
+      .parent-stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 580px) {
+      .parent-stats-row { grid-template-columns: 1fr 1fr; }
+      .parent-header h1 span { display: none; }
+      .monitoring-pill { font-size: 0.7rem; padding: 6px 10px; }
+      .parent-logout-btn span { display: none; }
+    }
+  </style>
+</head>
+<body class="dark-theme">
+
+  <!-- ══════════════════════════════════════════
+       PARENT LOGIN GATE
+       ══════════════════════════════════════════ -->
+  <div id="parent-gate">
+    <div class="gate-card">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.55rem; font-weight: 800; text-align: center; margin-bottom: 0.6rem; line-height: 1.35; letter-spacing: -0.02em;">
+        Welcome to<br>
+        <span style="display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; vertical-align: middle;">
+          <i class="fa-solid fa-graduation-cap flame-brand" style="font-size: 1.55rem;"></i>
+          Study<span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Streak</span><span style="color: #818cf8; font-weight: 800; margin-left: 4px;">Parent</span>
+        </span>
+      </h2>
+      <div class="parent-badge" style="margin: 0 auto 1.5rem; justify-content: center; width: fit-content;">
+        <i class="fa-solid fa-user-shield"></i> Parent Desk Portal
+      </div>
+      <!-- Stage 1: ID search -->
+      <div id="gate-stage-search">
+        <p>Securely enter your Parent ID (e.g., SSBP0001), Student ID (e.g., SSB0001), or your child's registered username to view their B.Tech revision stats and academic goal metrics.</p>
+
+        <input type="text" id="parent-search-input" class="gate-input" placeholder="Parent ID, Student ID, or Username..." autocomplete="off">
+        <button class="gate-btn" id="parent-submit-btn">
+          <i class="fa-solid fa-unlock"></i> Access Parent Desk
+        </button>
+      </div>
+
+      <!-- Stage 2: Create password (first time) -->
+      <div id="gate-stage-setup" style="display: none;">
+        <p style="margin-bottom: 1.2rem;">🔒 <strong>First-Time Observer Access</strong><br>Establish a parent passcode to protect this monitoring desk from unauthorized view access.</p>
+        <input type="password" id="parent-setup-pw" class="gate-input" placeholder="Create parent passcode..." autocomplete="off">
+        <button class="gate-btn" id="parent-setup-pw-btn" style="background: var(--success-gradient); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+          <i class="fa-solid fa-lock"></i> Save &amp; Unlock Portal
+        </button>
+        <div style="margin-top: 1.2rem; font-size: 0.78rem;">
+          <a href="#" id="back-to-search-setup" style="color: var(--parent-accent); text-decoration: none; font-weight: 600;">
+            <i class="fa-solid fa-arrow-left"></i> Back to ID Entry
+          </a>
+        </div>
+      </div>
+
+      <!-- Stage 3: Enter password (subsequent times) -->
+      <div id="gate-stage-login" style="display: none;">
+        <p style="margin-bottom: 1.2rem;">🔒 <strong>Enter Parent Passcode</strong><br>Provide the secure observer password you set during your first-time login to continue.</p>
+        <input type="password" id="parent-login-pw" class="gate-input" placeholder="Parent passcode..." autocomplete="off">
+        <button class="gate-btn" id="parent-login-pw-btn">
+          <i class="fa-solid fa-key"></i> Verify &amp; Unlock
+        </button>
+        <div style="margin-top: 1.2rem; font-size: 0.78rem;">
+          <a href="#" id="back-to-search-login" style="color: var(--parent-accent); text-decoration: none; font-weight: 600;">
+            <i class="fa-solid fa-arrow-left"></i> Back to ID Entry
+          </a>
+        </div>
+      </div>
+      
+      <div class="gate-error" id="parent-error" style="display: none; margin-top: 1rem; font-size: 0.8rem; color: var(--danger-color); align-items: center; justify-content: center; gap: 6px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> No registered student profiles match this ID or Username.
+      </div>
+      
+      <div style="margin-top: 1.5rem; font-size: 0.78rem;">
+        <a href="index.html" style="color: var(--text-muted); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--text-muted)'">
+          <i class="fa-solid fa-arrow-left"></i> Return to Homepage
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       PARENT MONITORING VIEWPORT
+       ══════════════════════════════════════════ -->
+  <div id="parent-dashboard">
+    <!-- Header -->
+    <header class="parent-header">
+      <div class="parent-header-left">
+        <i class="fa-solid fa-graduation-cap flame-brand" style="font-size:1.6rem;"></i>
+        <h1 style="font-family:'Outfit',sans-serif; font-size:1.25rem; font-weight:800; letter-spacing:-0.02em; display:flex; align-items:center; gap:0;">
+          Study<span style="color:var(--primary-color);">Streak</span><span style="color:#818cf8; margin-left:6px; font-size:1rem; font-weight:700;">Parent</span>
+        </h1>
+        <span class="parent-badge"><i class="fa-solid fa-eye" style="font-size:0.6rem;"></i> Observer Mode</span>
+      </div>
+      <div class="parent-header-right">
+        <div class="monitoring-pill" id="monitoring-title">
+          <i class="fa-solid fa-user-graduate" style="color:#818cf8;"></i> Loading Observer Desk...
+        </div>
+        <button class="parent-logout-btn" id="parent-exit">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Exit Portal</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="parent-main">
+
+      <!-- Stats Grid -->
+      <div class="parent-stats-row">
+        <!-- Level & XP -->
+        <div class="parent-stat-card psc-blue">
+          <div>
+            <div class="parent-stat-label"><i class="fa-solid fa-graduation-cap"></i> Level &amp; Progress</div>
+            <div class="parent-stat-value" id="pstat-level">Lv.1</div>
+          </div>
+          <div class="parent-stat-sub" id="pstat-xp-details">0 / 150 XP</div>
+        </div>
+
+        <!-- Consistency Streak -->
+        <div class="parent-stat-card psc-green">
+          <div>
+            <div class="parent-stat-label"><i class="fa-solid fa-fire"></i> Study Streak</div>
+            <div class="parent-stat-value" id="pstat-streak">0d</div>
+          </div>
+          <div class="parent-stat-sub">Consecutive study days</div>
+        </div>
+
+        <!-- Protective Freezes -->
+        <div class="parent-stat-card psc-red">
+          <div>
+            <div class="parent-stat-label"><i class="fa-solid fa-shield-halved"></i> Active Freezes</div>
+            <div class="parent-stat-value" id="pstat-freezes">3 / 5</div>
+          </div>
+          <div class="parent-stat-sub">Safeguards missed study days</div>
+        </div>
+
+        <!-- Reward Gold Balance -->
+        <div class="parent-stat-card psc-amber">
+          <div>
+            <div class="parent-stat-label"><i class="fa-solid fa-coins"></i> Reward Coins</div>
+            <div class="parent-stat-value" id="pstat-gold">0 GP</div>
+          </div>
+          <div class="parent-stat-sub">Points from completed tasks</div>
+        </div>
+      </div>
+
+      <!-- Main Columns -->
+      <div class="parent-grid-two-col">
+
+        <!-- LEFT COLUMN: Goals and Academic Tasks -->
+        <div>
+          <!-- Goal Board -->
+          <div class="parent-card">
+            <div class="parent-card-header">
+              <div class="parent-card-title">
+                <i class="fa-solid fa-clipboard-list"></i> Academic Goal Planner
+              </div>
+              <span class="parent-badge" id="pstat-goal-count" style="font-size: 0.65rem;">0 Active Goals</span>
+            </div>
+
+            <div id="p-goal-list" class="goal-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Automated Scholar Diagnostics -->
+          <div class="parent-card" id="parent-diagnostics-card">
+            <div class="parent-card-header">
+              <div class="parent-card-title">
+                <i class="fa-solid fa-chart-line"></i> Automated Scholar Diagnostics
+              </div>
+              <span class="parent-badge" style="font-size: 0.65rem; background: rgba(99,102,241,0.12); color:#818cf8; border-color:rgba(99,102,241,0.25)">Active Analysis</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+              <!-- Diagnostic item: Focus Grade -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.82rem;">
+                  <i class="fa-solid fa-award" style="color: #fbbf24; font-size: 1rem;"></i>
+                  <span>Consistency Grade:</span>
+                </div>
+                <strong id="diag-focus-grade" style="font-size: 0.88rem; font-family: 'Outfit', sans-serif;">C</strong>
+              </div>
+
+              <!-- Diagnostic item: Scholar Rating -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.82rem;">
+                  <i class="fa-solid fa-graduation-cap" style="color: #818cf8; font-size: 1rem;"></i>
+                  <span>Productivity Rating:</span>
+                </div>
+                <strong id="diag-focus-rating" style="font-size: 0.82rem; font-weight: 700; text-align: right;">Distracted</strong>
+              </div>
+
+              <!-- Diagnostic item: Syllabus Mastery -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.82rem;">
+                  <i class="fa-solid fa-book-open" style="color: #34d399; font-size: 1rem;"></i>
+                  <span>Syllabus Mastery Index:</span>
+                </div>
+                <strong id="diag-mastery-index" style="font-size: 0.82rem; font-weight: 700;">No Data</strong>
+              </div>
+
+              <!-- Diagnostic item: Streak Shield Protection -->
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.8rem; background: rgba(255,255,255,0.015); border: 1px solid var(--border-color); border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.82rem;">
+                  <i class="fa-solid fa-shield-halved" style="color: #f87171; font-size: 1rem;"></i>
+                  <span>Streak Procrastination Shield:</span>
+                </div>
+                <strong id="diag-shield-rating" style="font-size: 0.82rem; font-weight: 700; text-align: right;">Vulnerable</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Syllabus MCQ Scorecard -->
+          <div class="parent-card">
+            <div class="parent-card-header">
+              <div class="parent-card-title">
+                <i class="fa-solid fa-square-check"></i> Surprise MCQ Revision Scorecards
+              </div>
+              <span class="parent-badge" style="font-size: 0.65rem; background: rgba(52,211,153,0.12); color:#34d399; border-color:rgba(52,211,153,0.25)">Verified Quiz Grades</span>
+            </div>
+
+            <div id="p-test-log" class="test-log">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Focus History, Encouragement & Countdown Checklist -->
+        <div>
+          <!-- Parental Encouragement Desk -->
+          <div class="parent-card">
+            <div class="parent-card-header">
+              <div class="parent-card-title">
+                <i class="fa-solid fa-paper-plane"></i> Parental Encouragement Desk
+              </div>
+              <span class="parent-badge" style="font-size: 0.65rem; background: rgba(245,158,11,0.12); color:#fbbf24; border-color:rgba(245,158,11,0.25)"><i class="fa-solid fa-heart"></i> Motivation</span>
+            </div>
+            <p class="settings-tab-desc" style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.8rem;">Transmit a glowing motivational blessing directly to your child's active study desk dashboard.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+              <textarea id="parent-msg-input" class="gate-input" style="height: 80px; text-align: left; resize: none; margin-bottom: 0;" placeholder="Type a message, e.g., 'We are so proud of your consistency, keep going!'"></textarea>
+              <button class="gate-btn" id="parent-msg-send-btn" style="padding: 0.7rem; font-size: 0.88rem;">
+                <i class="fa-solid fa-share-from-square"></i> Transmit to Student Desk
+              </button>
+            </div>
+          </div>
+
+          <!-- Focus History Chart -->
+          <div class="parent-card">
+            <div class="parent-card-header">
+              <div class="parent-card-title">
+                <i class="fa-solid fa-chart-simple"></i> Weekly Pomodoro Focus Logs
+              </div>
+            </div>
+            
+            <div class="focus-chart-container" id="p-chart">
+              <!-- Bar chart populated dynamically -->
+            </div>
+            <p style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-top: 0.8rem; line-height: 1.4;">
+              <i class="fa-solid fa-circle-info"></i> Bars display total daily focus minutes. Hover over bars to see precise minutes spent in focus mode.
+            </p>
+          </div>
+
+          <!-- Daily Study Check-In Calendar Status -->
+          <div class="parent-card">
+            <div class="parent-card-header">
+              <div class="parent-card-title">
+                <i class="fa-solid fa-calendar-check"></i> Study Desk Attendance Calendar
+              </div>
+            </div>
+            <p class="settings-tab-desc" style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.8rem;">Displays verification checkmarks representing the child's daily presence at their focus desk over the past week.</p>
+            
+            <div class="checkin-calendar-row" id="p-calendar">
+              <!-- Calendar days populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Upcoming B.Tech Curriculum Exams -->
+          <div class="parent-card">
+            <div class="parent-card-header">
+              <div class="parent-card-title">
+                <i class="fa-solid fa-hourglass-half"></i> B.Tech University Exam Countdowns
+              </div>
+              <span class="parent-badge" id="pstat-branch-badge" style="font-size: 0.65rem; background: rgba(129, 140, 248, 0.12); color:#818cf8; border-color:rgba(129, 140, 248, 0.25)">Branch Core</span>
+            </div>
+            <p class="settings-tab-desc" style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.8rem;">Dynamic countdown timelines for major university exams mapped to the student's branch.</p>
+            
+            <div id="p-exam-countdown-list" style="display: flex; flex-direction: column; gap: 0.8rem;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Parent Portal JavaScript Controller -->
+  <script>
+    // Backfill existing user IDs if missing sequentially
+    function backfillUserIds() {
+      const users = JSON.parse(localStorage.getItem('users') || '{}');
+      let updated = false;
+      Object.keys(users).forEach((key, index) => {
+        const u = users[key];
+        if (!u.studentId || !u.parentId) {
+          u.studentId = `SSB${String(index + 1).padStart(4, '0')}`;
+          u.parentId = `SSBP${String(index + 1).padStart(4, '0')}`;
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+    }
+    backfillUserIds();
+
+    // Pre-calculated cumulative XP
+    function calcCumulativeXP(level, xp) {
+      let acc = 0;
+      for (let i = 1; i < level; i++) acc += i * 150;
+      return xp + (level - 1) * 150 + acc;
+    }
+
+    // Observer State Variables
+    let pendingUser = null;
+    let pendingKey = '';
+
+    // Switch Gate stage view
+    function switchGateStage(stage) {
+      const searchStage = document.getElementById('gate-stage-search');
+      const setupStage = document.getElementById('gate-stage-setup');
+      const loginStage = document.getElementById('gate-stage-login');
+
+      if (searchStage) searchStage.style.display = stage === 'search' ? 'block' : 'none';
+      if (setupStage) setupStage.style.display = stage === 'setup' ? 'block' : 'none';
+      if (loginStage) loginStage.style.display = stage === 'login' ? 'block' : 'none';
+      
+      // Clear password inputs
+      const setupInput = document.getElementById('parent-setup-pw');
+      const loginInput = document.getElementById('parent-login-pw');
+      if (setupInput) setupInput.value = '';
+      if (loginInput) loginInput.value = '';
+    }
+
+    // Dynamic error displays
+    function showGateError(msg) {
+      const err = document.getElementById('parent-error');
+      if (err) {
+        err.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+        err.style.display = 'flex';
+        setTimeout(() => { err.style.display = 'none'; }, 4000);
+      }
+    }
+
+    // Load active child from search query and determine login vs first-time passcode creation
+    function loadObserverChild(query) {
+      const users = JSON.parse(localStorage.getItem('users') || '{}');
+      let foundUser = null;
+      let matchedKey = '';
+
+      const q = query.trim().toLowerCase();
+
+      for (let key in users) {
+        const u = users[key];
+        if (
+          key === q ||
+          (u.username && u.username.toLowerCase() === q) ||
+          (u.studentId && u.studentId.toLowerCase() === q) ||
+          (u.parentId && u.parentId.toLowerCase() === q)
+        ) {
+          foundUser = u;
+          matchedKey = key;
+          break;
+        }
+      }
+
+      if (!foundUser) {
+        showGateError('No registered student profiles match this ID or Username.');
+        return false;
+      }
+
+      pendingUser = foundUser;
+      pendingKey = matchedKey;
+
+      if (foundUser.parentPassword) {
+        // Go to Stage 3: Enter passcode verification
+        switchGateStage('login');
+      } else {
+        // Go to Stage 2: Setup passcode for the first time
+        switchGateStage('setup');
+      }
+      return true;
+    }
+
+    // Render Parent monitoring dashboard details
+    function renderParentPortal(user) {
+      // Set titles
+      document.getElementById('monitoring-title').innerHTML = `
+        <i class="fa-solid fa-user-graduate" style="color:#818cf8;"></i>
+        <span>Monitoring: <strong>${user.username}</strong> [${user.branch || 'N/A'}] &nbsp;(${user.studentId || 'SSB0000'})</span>
+      `;
+
+      // Stats
+      const maxXP = user.level * 150;
+      document.getElementById('pstat-level').innerText = `Lv.${user.level}`;
+      document.getElementById('pstat-xp-details').innerText = `${user.xp} / ${maxXP} XP (Lv.${user.level} → ${user.level + 1})`;
+      document.getElementById('pstat-streak').innerText = `${user.streak || 0}d`;
+      document.getElementById('pstat-freezes').innerText = `${user.freezes ?? 3} / 5`;
+      document.getElementById('pstat-gold').innerText = `${user.gold ?? 0} GP`;
+
+      // 1. Quests List
+      const goalListEl = document.getElementById('p-goal-list');
+      goalListEl.innerHTML = '';
+      
+      const quests = user.quests || [];
+      if (quests.length === 0) {
+        goalListEl.innerHTML = `
+          <div class="parent-empty-card">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <p>No active study goals set at the moment.</p>
+          </div>`;
+        document.getElementById('pstat-goal-count').innerText = "No Goals Set";
+      } else {
+        const activeCount = quests.filter(q => !q.completed).length;
+        document.getElementById('pstat-goal-count').innerText = `${activeCount} Active ${activeCount === 1 ? 'Goal' : 'Goals'}`;
+
+        quests.forEach(q => {
+          const item = document.createElement('div');
+          item.className = `goal-item ${q.completed ? 'done-task' : ''}`;
+          
+          const checkboxHtml = q.completed 
+            ? `<i class="fa-solid fa-circle-check goal-status-checkbox checked"></i>`
+            : `<i class="fa-solid fa-circle goal-status-checkbox pending"></i>`;
+
+          const priorityLabel = (q.rarity || 'standard').toLowerCase();
+
+          item.innerHTML = `
+            ${checkboxHtml}
+            <div class="goal-text-block">
+              <div class="goal-name">${q.text}</div>
+              <div class="goal-meta">
+                <span class="badge-priority priority-${priorityLabel}">${priorityLabel} target</span>
+                <span>Created: ${q.createdAt ? new Date(q.createdAt).toLocaleDateString() : 'N/A'}</span>
+              </div>
+            </div>
+          `;
+          goalListEl.appendChild(item);
+        });
+      }
+
+      // 2. Syllabus MCQ Test Scorecards
+      const testEl = document.getElementById('p-test-log');
+      testEl.innerHTML = '';
+      
+      // Pull scores from user syllabus test logs
+      const syllabusTestLogs = JSON.parse(localStorage.getItem(`syllabus_tests_${user.username.toLowerCase()}`) || '[]');
+      if (syllabusTestLogs.length === 0) {
+        testEl.innerHTML = `
+          <div class="parent-empty-card">
+            <i class="fa-solid fa-square-check"></i>
+            <p>No surprise syllabus revision test scorecards registered yet.</p>
+          </div>`;
+      } else {
+        syllabusTestLogs.forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'test-log-item';
+          
+          let gradeClass = 'ts-fail';
+          if (t.score >= 80) gradeClass = 'ts-excellent';
+          else if (t.score >= 50) gradeClass = 'ts-average';
+
+          card.innerHTML = `
+            <div class="test-name-block">
+              <i class="fa-solid fa-book-open" style="color:var(--primary-color)"></i>
+              <span>${t.subject} &mdash; ${t.topic}</span>
+            </div>
+            <span class="test-score ${gradeClass}">${t.score}% (${t.correct}/${t.total})</span>
+          `;
+          testEl.appendChild(card);
+        });
+      }
+
+      // 3. Weekly Focus Logs Chart
+      const chartEl = document.getElementById('p-chart');
+      chartEl.innerHTML = '';
+      
+      const focusMinutes = user.focusHistory || [0, 0, 0, 0, 0, 0, 0];
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      
+      const maxVal = Math.max(...focusMinutes, 25); // Baseline cap at 25 minutes for scaling
+      
+      focusMinutes.forEach((mins, i) => {
+        const col = document.createElement('div');
+        col.className = 'focus-bar-column';
+        
+        const heightPct = Math.round((mins / maxVal) * 100);
+        
+        col.innerHTML = `
+          <div class="focus-bar-fill" style="height: ${heightPct}%;" data-tooltip="${mins} minutes focused"></div>
+          <div class="focus-day-label">${days[i]}</div>
+        `;
+        chartEl.appendChild(col);
+      });
+
+      // 4. Daily Attendance Calendar Status
+      const calEl = document.getElementById('p-calendar');
+      calEl.innerHTML = '';
+      
+      // Parse last study dates
+      const lastCheck = user.lastCheckIn; // Date string if checked in
+      const today = new Date();
+      
+      // Show checkmark grids for the past 7 days
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+        const dateStr = d.toDateString();
+        
+        // Simulating matching presence check
+        // If they did focus time on this day or checked in
+        let studied = false;
+        if (lastCheck && new Date(lastCheck).toDateString() === dateStr) {
+          studied = true;
+        } else if (focusMinutes[d.getDay() === 0 ? 6 : d.getDay() - 1] > 0) {
+          // If focus logs show they spent focused minutes on this day of the week
+          studied = true;
+        }
+
+        const cell = document.createElement('div');
+        cell.className = `calendar-cell ${studied ? 'active-check' : ''}`;
+        cell.innerHTML = `
+          <span class="cc-label">${dayLabel}</span>
+          <i class="fa-solid fa-circle-check cc-icon"></i>
+        `;
+        calEl.appendChild(cell);
+      }
+
+      // 5. Automated Scholar Diagnostics Calculations
+      // Consistency Grade
+      const streakVal = user.streak || 0;
+      let consistencyGrade = 'C (Needs Support)';
+      let cColor = '#f87171';
+      if (streakVal >= 5) {
+        consistencyGrade = 'A+ (Elite)';
+        cColor = '#10b981';
+      } else if (streakVal >= 3) {
+        consistencyGrade = 'A (Excellent)';
+        cColor = '#34d399';
+      } else if (streakVal >= 1) {
+        consistencyGrade = 'B (Satisfactory)';
+        cColor = '#fbbf24';
+      }
+      const focusGradeEl = document.getElementById('diag-focus-grade');
+      if (focusGradeEl) {
+        focusGradeEl.innerText = consistencyGrade;
+        focusGradeEl.style.color = cColor;
+      }
+
+      // Scholar Productivity Rating
+      const historyMinutes = user.focusHistory || [0, 0, 0, 0, 0, 0, 0];
+      const totalWeeklyMins = historyMinutes.reduce((a, b) => a + b, 0);
+      let productivityRating = 'Distracted (0m Focus)';
+      let rColor = '#f87171';
+      if (totalWeeklyMins >= 120) {
+        productivityRating = 'Dedicated Scholar (' + totalWeeklyMins + 'm)';
+        rColor = '#10b981';
+      } else if (totalWeeklyMins >= 45) {
+        productivityRating = 'Consistent Learner (' + totalWeeklyMins + 'm)';
+        rColor = '#34d399';
+      } else if (totalWeeklyMins > 0) {
+        productivityRating = 'Developing Scholar (' + totalWeeklyMins + 'm)';
+        rColor = '#fbbf24';
+      }
+      const focusRatingEl = document.getElementById('diag-focus-rating');
+      if (focusRatingEl) {
+        focusRatingEl.innerText = productivityRating;
+        focusRatingEl.style.color = rColor;
+      }
+
+      // Syllabus MCQ Mastery Index
+      let masteryIndex = 'No Data';
+      let mColor = '#94a3b8';
+      if (syllabusTestLogs.length > 0) {
+        const totalScore = syllabusTestLogs.reduce((acc, t) => acc + t.score, 0);
+        const avgScore = Math.round(totalScore / syllabusTestLogs.length);
+        if (avgScore >= 80) {
+          masteryIndex = 'Excellent (' + avgScore + '%)';
+          mColor = '#10b981';
+        } else if (avgScore >= 50) {
+          masteryIndex = 'Satisfactory (' + avgScore + '%)';
+          mColor = '#fbbf24';
+        } else {
+          masteryIndex = 'Critical (' + avgScore + '%)';
+          mColor = '#f87171';
+        }
+      }
+      const masteryIndexEl = document.getElementById('diag-mastery-index');
+      if (masteryIndexEl) {
+        masteryIndexEl.innerText = masteryIndex;
+        masteryIndexEl.style.color = mColor;
+      }
+
+      // Streak Procrastination Shield
+      const activeFreezes = user.freezes ?? 3;
+      let shieldProtection = 'Critical Risk (0 Freezes)';
+      let sColor = '#f87171';
+      if (activeFreezes >= 4) {
+        shieldProtection = 'Highly Protected (' + activeFreezes + ' Freezes)';
+        sColor = '#10b981';
+      } else if (activeFreezes >= 2) {
+        shieldProtection = 'Moderately Shielded (' + activeFreezes + ' Freezes)';
+        sColor = '#34d399';
+      } else if (activeFreezes === 1) {
+        shieldProtection = 'Vulnerable (1 Freeze)';
+        sColor = '#fbbf24';
+      }
+      const shieldRatingEl = document.getElementById('diag-shield-rating');
+      if (shieldRatingEl) {
+        shieldRatingEl.innerText = shieldProtection;
+        shieldRatingEl.style.color = sColor;
+      }
+
+      // 6. Upcoming B.Tech Curriculum Exam Countdowns
+      const branchBadge = document.getElementById('pstat-branch-badge');
+      const branch = user.branch || 'N/A';
+      if (branchBadge) {
+        branchBadge.innerText = branch;
+      }
+
+      const countdownListEl = document.getElementById('p-exam-countdown-list');
+      if (countdownListEl) {
+        countdownListEl.innerHTML = '';
+        
+        // Define branch-specific exams
+        const isCSE = branch.toLowerCase().includes('cse');
+        const exams = isCSE 
+          ? [
+              { name: 'Engineering Physics', dateStr: 'June 8, 2026' },
+              { name: 'Analytical Mathematics', dateStr: 'June 18, 2026' },
+              { name: 'Basic Electronics', dateStr: 'June 28, 2026' }
+            ]
+          : [
+              { name: 'Programming for Problem Solving', dateStr: 'June 8, 2026' },
+              { name: 'Basic Electrical Science', dateStr: 'June 18, 2026' },
+              { name: 'Environmental Sciences', dateStr: 'June 28, 2026' }
+            ];
+
+        function daysRemaining(targetDateStr) {
+          const diffTime = new Date(targetDateStr) - new Date('2026-05-26T17:32:13+05:30');
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays > 0 ? diffDays : 0;
+        }
+
+        exams.forEach(ex => {
+          const daysLeft = daysRemaining(ex.dateStr);
+          const badgeStyle = daysLeft <= 15 
+            ? 'background: rgba(239,68,68,0.12); color:#f87171; border:1px solid rgba(239,68,68,0.25)' 
+            : (daysLeft <= 25 ? 'background: rgba(245,158,11,0.12); color:#fbbf24; border:1px solid rgba(245,158,11,0.25)' : 'background: rgba(255,255,255,0.05); color:#94a3b8;');
+          
+          const item = document.createElement('div');
+          item.className = 'goal-item';
+          item.style.justifyContent = 'space-between';
+          item.style.alignItems = 'center';
+          item.innerHTML = `
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <i class="fa-solid fa-graduation-cap" style="color: var(--parent-accent)"></i>
+              <div>
+                <strong style="font-size:0.85rem; color:#fff;">${ex.name}</strong>
+                <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Target: ${ex.dateStr}</div>
+              </div>
+            </div>
+            <span class="badge-priority" style="${badgeStyle} padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700;">
+              ${daysLeft} Days Left
+            </span>
+          `;
+          countdownListEl.appendChild(item);
+        });
+      }
+    }
+
+    // DOM Ready Event Handlers
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check for parent session in localStorage
+      const activeObsKey = localStorage.getItem('parent_observer_token');
+      if (activeObsKey) {
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const user = users[activeObsKey];
+        if (user) {
+          renderParentPortal(user);
+          document.getElementById('parent-gate').style.display = 'none';
+          document.getElementById('parent-dashboard').style.display = 'block';
+        } else {
+          localStorage.removeItem('parent_observer_token');
+        }
+      }
+
+      // Login trigger
+      document.getElementById('parent-submit-btn').addEventListener('click', () => {
+        const inputVal = document.getElementById('parent-search-input').value;
+        if (inputVal.trim() === '') return;
+        loadObserverChild(inputVal);
+      });
+
+      document.getElementById('parent-search-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const inputVal = document.getElementById('parent-search-input').value;
+          if (inputVal.trim() === '') return;
+          loadObserverChild(inputVal);
+        }
+      });
+
+      // First-time Setup Passcode Submit
+      document.getElementById('parent-setup-pw-btn').addEventListener('click', () => {
+        const pw = document.getElementById('parent-setup-pw').value;
+        if (pw.length < 4) {
+          showGateError('Passcode must be at least 4 characters long!');
+          return;
+        }
+        
+        // Save passcode to users profile
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        if (users[pendingKey]) {
+          users[pendingKey].parentPassword = pw;
+          localStorage.setItem('users', JSON.stringify(users));
+          pendingUser.parentPassword = pw; // Sync local object
+        }
+        
+        // Complete login
+        localStorage.setItem('parent_observer_token', pendingKey);
+        renderParentPortal(pendingUser);
+        
+        document.getElementById('parent-gate').style.display = 'none';
+        document.getElementById('parent-dashboard').style.display = 'block';
+        switchGateStage('search'); // Reset stage for next sessions
+      });
+
+      // Verify Passcode Submit
+      document.getElementById('parent-login-pw-btn').addEventListener('click', () => {
+        const pw = document.getElementById('parent-login-pw').value;
+        if (pw === pendingUser.parentPassword) {
+          // Success
+          localStorage.setItem('parent_observer_token', pendingKey);
+          renderParentPortal(pendingUser);
+          
+          document.getElementById('parent-gate').style.display = 'none';
+          document.getElementById('parent-dashboard').style.display = 'block';
+          switchGateStage('search'); // Reset stage for next sessions
+        } else {
+          showGateError('Incorrect observer passcode. Please try again.');
+          document.getElementById('parent-login-pw').value = '';
+        }
+      });
+
+      // Back navigation button events
+      document.getElementById('back-to-search-setup').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchGateStage('search');
+      });
+      document.getElementById('back-to-search-login').addEventListener('click', (e) => {
+        e.preventDefault();
+        switchGateStage('search');
+      });
+
+      // Exit / Logout trigger
+      document.getElementById('parent-exit').addEventListener('click', () => {
+        localStorage.removeItem('parent_observer_token');
+        document.getElementById('parent-gate').style.display = 'flex';
+        document.getElementById('parent-dashboard').style.display = 'none';
+        document.getElementById('parent-search-input').value = '';
+        switchGateStage('search'); // Clear password screen on exit
+      });
+
+      // Parental Encouragement Desk: Transmit motivation message
+      const sendBtn = document.getElementById('parent-msg-send-btn');
+      if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+          const msgInput = document.getElementById('parent-msg-input');
+          const msgText = msgInput ? msgInput.value.trim() : '';
+          
+          if (msgText === '') {
+            showToast('Empty Message', 'Please write a motivational blessing before transmitting!', 'alert');
+            return;
+          }
+          
+          const activeObsKey = localStorage.getItem('parent_observer_token');
+          if (activeObsKey) {
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            const user = users[activeObsKey];
+            if (user) {
+              user.parentMessage = msgText;
+              user.parentMessageRead = false;
+              users[activeObsKey] = user;
+              localStorage.setItem('users', JSON.stringify(users));
+              
+              if (msgInput) msgInput.value = '';
+              showToast('Blessing Transmitted!', 'Your motivational note was uploaded to your child\'s study desk!', 'success');
+            } else {
+              showToast('Error', 'Unable to resolve monitored student profile.', 'alert');
+            }
+          } else {
+            showToast('Error', 'No active observer session found.', 'alert');
+          }
+        });
+      }
+      
+      // Local toast notification generator
+      window.showToast = function(title, message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        let iconClass = 'fa-circle-info';
+        if (type === 'success') {
+          iconClass = 'fa-circle-check';
+        } else if (type === 'alert') {
+          iconClass = 'fa-triangle-exclamation';
+        }
+        
+        toast.innerHTML = `
+          <i class="fa-solid ${iconClass} toast-icon"></i>
+          <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+          </div>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.classList.add('toast-out');
+          toast.addEventListener('animationend', () => {
+            toast.remove();
+          });
+        }, 4000);
+      };
+      
+      // Auto theme enforce matching standard dark slates
+      document.body.classList.add('dark-theme');
+    });
+  </script>
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container"></div>
+</body>
+</html>

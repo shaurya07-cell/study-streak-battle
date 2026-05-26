@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyStreak - B.Tech Academic Focus Companion</title>
+  <meta name="description" content="A premium B.Tech collegiate study desk and consistency tracker tailored to your engineering branch syllabus.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Immediate Redirect check
+    if (localStorage.getItem('token')) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</head>
+<body class="dark-theme">
+
+  <!-- Landing Header Navigation Bar -->
+  <header class="landing-header">
+    <div class="header-logo">
+      <i class="fa-solid fa-graduation-cap flame-brand"></i>
+      <h2>Study<span>Streak</span></h2>
+    </div>
+    <nav class="landing-nav" style="display: flex; align-items: center; gap: 1rem;">
+      <a href="#features" class="landing-nav-link">Features</a>
+      <a href="#syllabus" class="landing-nav-link">Syllabus</a>
+      <a href="parent.html" class="landing-nav-link" style="color: #818cf8; font-weight: 600;"><i class="fa-solid fa-user-shield"></i> Parents</a>
+      <a href="login.html" class="btn btn-outline" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; border-radius: 8px;">Sign In</a>
+    </nav>
+  </header>
+
+  <!-- Hero Showcase Grid -->
+  <section class="landing-hero-section">
+    <div class="hero-text-col">
+      <h1>Establish Your Consistency.<br><span>Excel in B.Tech.</span></h1>
+      <p class="hero-subtitle">A highly personalized study dashboard, Pomodoro planner, and curriculum-guided revision hub tailored directly to your engineering branch syllabus.</p>
+      
+
+      <div class="hero-cta-buttons">
+        <a href="login.html" class="btn btn-primary btn-glow btn-lg" style="border-radius: 10px;">
+          <span>Register Profile</span> <i class="fa-solid fa-user-plus"></i>
+        </a>
+        <a href="#features" class="btn btn-outline btn-lg" style="border-radius: 10px;">
+          <span>Explore Features</span> <i class="fa-solid fa-compass"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- High-Fidelity Interactive CSS Dashboard Mockup -->
+    <div class="hero-mockup-col">
+      <div class="laptop-mockup">
+        <div class="laptop-screen">
+          
+          <!-- Mock Header -->
+          <div class="mock-header">
+            <div class="mock-logo">
+              <i class="fa-solid fa-graduation-cap text-indigo" style="color: var(--primary-color);"></i>
+              <span>StudyStreak</span>
+            </div>
+            <div class="mock-user-badge">
+              <i class="fa-solid fa-user-graduate" style="color: var(--secondary-color);"></i>
+              <span>Alex Sharma [CSE++]</span>
+            </div>
+          </div>
+
+          <!-- Mock Dashboard Content -->
+          <div class="mock-main">
+            <!-- Left Card: Pomodoro desk timer -->
+            <div class="mock-card">
+              <h4><i class="fa-solid fa-hourglass-start"></i> Focus Desk</h4>
+              <div class="mock-timer">
+                <span class="mock-timer-digits">24:58</span>
+                <span class="mock-timer-label">Focusing...</span>
+              </div>
+            </div>
+
+            <!-- Right Card: Syllabus Randomizer -->
+            <div class="mock-card">
+              <h4><i class="fa-solid fa-shuffle"></i> Randomizer</h4>
+              <div class="mock-dice">
+                <i class="fa-solid fa-dice mock-dice-icon"></i>
+                <span class="mock-dice-topic">Quantum Mechanics</span>
+              </div>
+            </div>
+
+            <!-- Bottom Left Card: Focus Analytics -->
+            <div class="mock-card" style="grid-column: span 2; justify-content: flex-start; gap: 4px;">
+              <h4 style="margin-bottom: 2px;"><i class="fa-solid fa-list-check"></i> Study Goals (Active Targets)</h4>
+              <div class="mock-goals-list">
+                <div class="mock-goal-item">
+                  <i class="fa-solid fa-circle-check check-icon"></i>
+                  <span>[High] Revise Hall Effect units</span>
+                </div>
+                <div class="mock-goal-item">
+                  <i class="fa-solid fa-circle-check check-icon"></i>
+                  <span>[Critical] Complete Physics revision MCQ test</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Features Grid Tour -->
+  <section class="landing-features-section" id="features">
+    <h2 class="section-title">The Student Consistency Desk</h2>
+    <p class="section-subtitle">Slay distractions, conquer your academic goals, and compare consistency leaderboards with classmates in real-time.</p>
+
+    <div class="features-grid">
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <div class="feature-icon-wrapper">
+          <i class="fa-solid fa-stopwatch"></i>
+        </div>
+        <h3 style="color: #ffffff; font-weight: 700;">Collegiate Focus Timer</h3>
+        <p>Smart Pomodoro timer with ambient soundscapes to lock in deep, distraction-free focus.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <div class="feature-icon-wrapper" style="background: var(--secondary-gradient);">
+          <i class="fa-solid fa-shuffle"></i>
+        </div>
+        <h3 style="color: #ffffff; font-weight: 700;">Syllabus Randomizer</h3>
+        <p>Roll to get a surprise revision topic from your B.Tech branch and test yourself with MCQs.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <div class="feature-icon-wrapper" style="background: var(--cyan-gradient);">
+          <i class="fa-solid fa-ranking-star"></i>
+        </div>
+        <h3 style="color: #ffffff; font-weight: 700;">Consistency Leaderboard</h3>
+        <p>Maintain your daily streak and climb the live class leaderboard among your batchmates.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       WHY STUDYSTREAK — Deep Feature Info Section
+       ============================================ -->
+  <section class="landing-why-section" id="why" style="padding: 5rem 2rem; max-width: 1100px; margin: 0 auto;">
+    <style>
+      .why-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+        margin-top: 2.5rem;
+      }
+      @media (max-width: 700px) { .why-grid { grid-template-columns: 1fr; } }
+
+      .why-card {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 1.2rem 1.4rem;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 18px;
+        transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      }
+      .why-card:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: rgba(99,102,241,0.3);
+        transform: translateY(-3px);
+      }
+      .why-icon {
+        width: 44px; height: 44px; min-width: 44px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.15rem;
+      }
+      .wi-purple { background: rgba(99,102,241,0.18); color: #818cf8; }
+      .wi-teal   { background: rgba(13,148,136,0.18);  color: #2dd4bf; }
+      .wi-amber  { background: rgba(245,158,11,0.18);  color: #fbbf24; }
+      .wi-green  { background: rgba(16,185,129,0.18);  color: #34d399; }
+      .wi-rose   { background: rgba(239,68,68,0.18);   color: #f87171; }
+      .wi-blue   { background: rgba(59,130,246,0.18);  color: #60a5fa; }
+
+      .why-body h4 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #e2e8f0;
+        margin-bottom: 5px;
+      }
+      .why-body p {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.5;
+        margin-bottom: 8px;
+      }
+      .why-benefit {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(52,211,153,0.10);
+        border: 1px solid rgba(52,211,153,0.22);
+        border-radius: 6px;
+        padding: 3px 9px;
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: #6ee7b7;
+      }
+      .why-benefit i { font-size: 0.6rem; }
+
+      .why-stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+      }
+      .why-stat {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 1.2rem 1rem;
+        text-align: center;
+      }
+      .why-stat .ws-val {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #818cf8;
+        line-height: 1;
+        margin-bottom: 5px;
+      }
+      .why-stat .ws-label {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.45);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .why-notice {
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(99,102,241,0.07);
+        border: 1px solid rgba(99,102,241,0.18);
+        border-radius: 14px;
+        padding: 1rem 1.4rem;
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.5;
+      }
+      .why-notice i { color: #818cf8; font-size: 1rem; flex-shrink: 0; }
+    </style>
+
+    <h2 class="section-title">Why StudyStreak Works</h2>
+    <p class="section-subtitle">Every feature is built around one goal: helping you study smarter, stay consistent, and never fall behind your peers again.</p>
+
+    <!-- Stats Row -->
+    <div class="why-stats-row">
+      <div class="why-stat">
+        <div class="ws-val">7+</div>
+        <div class="ws-label">B.Tech Branches Supported</div>
+      </div>
+      <div class="why-stat">
+        <div class="ws-val">&#x221E;</div>
+        <div class="ws-label">Study Hours Possible</div>
+      </div>
+      <div class="why-stat">
+        <div class="ws-val">Live</div>
+        <div class="ws-label">Peer Group Rooms</div>
+      </div>
+    </div>
+
+    <!-- 6 Feature Cards with Benefit Tags -->
+    <div class="why-grid">
+
+      <div class="why-card">
+        <div class="why-icon wi-purple"><i class="fa-solid fa-stopwatch"></i></div>
+        <div class="why-body">
+          <h4>&#x1F345; Pomodoro Focus Desk</h4>
+          <p>Timed study blocks with ambient soundscapes for deep, distraction-free focus.</p>
+          <span class="why-benefit"><i class="fa-solid fa-circle-check"></i> Reduces distractions &mdash; boosts study output by up to 40% vs. unstructured sessions</span>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-icon wi-teal"><i class="fa-solid fa-shuffle"></i></div>
+        <div class="why-body">
+          <h4>&#x1F3B2; Syllabus Smart Randomizer</h4>
+          <p>Roll the branch dice to pull a surprise revision unit and practice with MCQ flash quizzes.</p>
+          <span class="why-benefit"><i class="fa-solid fa-circle-check"></i> Stops selective studying &mdash; forces full-syllabus revision before exams</span>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-icon wi-amber"><i class="fa-solid fa-ranking-star"></i></div>
+        <div class="why-body">
+          <h4>&#x1F3C6; Class Consistency Leaderboard</h4>
+          <p>Maintain your daily streak and climb the live leaderboard among your batchmates.</p>
+          <span class="why-benefit"><i class="fa-solid fa-circle-check"></i> Builds healthy peer competition &mdash; staying ranked keeps you motivated daily</span>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-icon wi-green"><i class="fa-solid fa-video"></i></div>
+        <div class="why-body">
+          <h4>&#x1F4F9; Live Group Study Rooms</h4>
+          <p>Create or join a private room with a shareable code and study together on webcam.</p>
+          <span class="why-benefit"><i class="fa-solid fa-circle-check"></i> Accountability effect &mdash; you study harder when classmates can see you</span>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-icon wi-rose"><i class="fa-solid fa-bullseye"></i></div>
+        <div class="why-body">
+          <h4>&#x1F3AF; Personal Goals &amp; Progress Tracking</h4>
+          <p>Set weekly goals, mark chapters done, and watch your progress bars fill up.</p>
+          <span class="why-benefit"><i class="fa-solid fa-circle-check"></i> Gives you clarity &mdash; know exactly what's pending and never miss a chapter again</span>
+        </div>
+      </div>
+
+      <div class="why-card">
+        <div class="why-icon wi-blue"><i class="fa-solid fa-palette"></i></div>
+        <div class="why-body">
+          <h4>&#x1F3A8; Theme &amp; Sound Customizer</h4>
+          <p>Personalize themes, accent colors, font sizes, and ambient audio to suit your style.</p>
+          <span class="why-benefit"><i class="fa-solid fa-circle-check"></i> Comfort = longer sessions &mdash; a workspace you love keeps you at your desk longer</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Free Notice -->
+    <div class="why-notice">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Your account is verified with a one-time OTP sent to your mobile. No email required &mdash; just your 10-digit phone number. StudyStreak is <strong>100% free</strong> to use.</span>
+    </div>
+  </section>
+
+  <!-- B.Tech Academic Branches Showcase -->
+  <section class="landing-branches-section" id="syllabus">
+    <h2 class="section-title">Supported B.Tech Branch Divisions</h2>
+    <p class="section-subtitle">The Syllabus Randomizer automatically parses your specific university courses based on your branch.</p>
+
+    <div class="branch-card-grid">
+      <!-- CSE -->
+      <div class="branch-showcase-card">
+        <i class="fa-solid fa-laptop-code"></i>
+        <h4>CSE++ & CSE Core</h4>
+        <p>Subjects: Mechanical Engineering, Basic Electronics, Engineering Chemistry, and Analytical Mathematics.</p>
+      </div>
+
+      <!-- AI/ML & other branches -->
+      <div class="branch-showcase-card">
+        <i class="fa-solid fa-microchip"></i>
+        <h4>AI/ML, ECE, ME, EE, CE</h4>
+        <p>Subjects: Analytical Mathematics, Basic Electrical, Physics, Programming for Problem Solving, and Environmental Sciences.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Landing Footer -->
+  <footer class="landing-footer">
+    <div class="header-logo" style="justify-content: center; margin-bottom: 1rem;">
+      <i class="fa-solid fa-graduation-cap flame-brand"></i>
+      <h2>Study<span>Streak</span></h2>
+    </div>
+    <p class="copy">&copy; 2026 StudyStreak Hub. Tailored with dedication for engineering students everywhere.</p>
+    <p class="copy" style="margin-top: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.35);">Created by <strong style="color: rgba(255,255,255,0.55);">Shaurya Hindocha</strong>, RIT Roorkee</p>
+
+    <!-- Social Links Row -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 14px;">
+      <a href="https://www.instagram.com/shaurya._.2409_/" target="_blank" rel="noopener noreferrer"
+        style="display: inline-flex; align-items: center; gap: 7px; text-decoration: none; color: rgba(255,255,255,0.45); font-size: 0.8rem; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;"
+        onmouseover="this.style.color='#e1306c'; this.style.borderColor='rgba(225,48,108,0.4)'; this.style.background='rgba(225,48,108,0.08)';"
+        onmouseout="this.style.color='rgba(255,255,255,0.45)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';">
+        <i class="fa-brands fa-instagram" style="font-size: 1rem;"></i> Instagram
+      </a>
+      <a href="https://www.linkedin.com/in/shaurya-hindocha-47961b380/" target="_blank" rel="noopener noreferrer"
+        style="display: inline-flex; align-items: center; gap: 7px; text-decoration: none; color: rgba(255,255,255,0.45); font-size: 0.8rem; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;"
+        onmouseover="this.style.color='#0a66c2'; this.style.borderColor='rgba(10,102,194,0.4)'; this.style.background='rgba(10,102,194,0.08)';"
+        onmouseout="this.style.color='rgba(255,255,255,0.45)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';">
+        <i class="fa-brands fa-linkedin" style="font-size: 1rem;"></i> LinkedIn
+      </a>
+      <a href="https://x.com/shaurya240907" target="_blank" rel="noopener noreferrer"
+        style="display: inline-flex; align-items: center; gap: 7px; text-decoration: none; color: rgba(255,255,255,0.45); font-size: 0.8rem; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); transition: all 0.2s ease;"
+        onmouseover="this.style.color='#ffffff'; this.style.borderColor='rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.07)';"
+        onmouseout="this.style.color='rgba(255,255,255,0.45)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.03)';">
+        <i class="fa-brands fa-x-twitter" style="font-size: 1rem;"></i> Twitter / X
+      </a>
+    </div>
+  </footer>
+
+</body>
+</html>

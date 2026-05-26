@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyStreak — Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Admin Panel Exclusive Styles ── */
+    :root {
+      --admin-accent: #f59e0b;
+      --admin-accent-glow: rgba(245,158,11,0.25);
+      --admin-red: #ef4444;
+      --admin-green: #22c55e;
+    }
+
+    /* ─── Login Gate ─── */
+    #admin-gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-color);
+      position: relative;
+    }
+    #admin-gate::before {
+      content: '';
+      position: fixed;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .gate-card {
+      background: var(--card-bg-gradient);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 24px;
+      padding: 2.8rem 2.4rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.4), 0 0 0 1px rgba(245,158,11,0.1);
+      text-align: center;
+      z-index: 2;
+    }
+    .gate-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; color: #fff;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 10px 30px rgba(245,158,11,0.4);
+    }
+    .gate-card h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .gate-card p { font-size: 0.84rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .gate-input {
+      width: 100%; padding: 0.9rem 1.1rem;
+      border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03); color: #fff;
+      font-family: var(--font-family); font-size: 0.9rem;
+      margin-bottom: 1rem; box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .gate-input:focus { outline: none; border-color: var(--admin-accent); }
+    .gate-btn {
+      width: 100%; padding: 0.9rem;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: none; border-radius: 12px;
+      color: #fff; font-weight: 700; font-size: 0.95rem;
+      cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+    }
+    .gate-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .gate-error {
+      margin-top: 0.8rem; font-size: 0.8rem;
+      color: var(--admin-red); display: none;
+    }
+
+    /* ─── Admin Dashboard ─── */
+    #admin-dashboard { display: none; min-height: 100vh; }
+
+    /* Admin Header */
+    .admin-header {
+      background: rgba(10,10,20,0.95);
+      border-bottom: 1px solid rgba(245,158,11,0.15);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+    .admin-header-left {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .admin-logo-badge {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-radius: 10px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: #fff;
+    }
+    .admin-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem; font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .admin-header h1 span { color: #f59e0b; }
+    .admin-badge {
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.68rem; font-weight: 700;
+      color: #fbbf24;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .admin-header-right { display: flex; align-items: center; gap: 12px; }
+    .admin-logout-btn {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 10px;
+      padding: 6px 14px;
+      color: #f87171; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: background 0.2s;
+    }
+    .admin-logout-btn:hover { background: rgba(239,68,68,0.2); }
+
+    /* Main Content */
+    .admin-main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+
+    /* Overview Stats Row */
+    .admin-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+    }
+    .admin-stat-card {
+      background: var(--card-bg-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.4rem 1.6rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+    .admin-stat-card:hover { transform: translateY(-2px); }
+    .admin-stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .asc-blue::after  { background: linear-gradient(90deg, #6366f1, #818cf8); }
+    .asc-green::after { background: linear-gradient(90deg, #22c55e, #34d399); }
+    .asc-amber::after { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .asc-rose::after  { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .admin-stat-label {
+      font-size: 0.72rem; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .admin-stat-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem; font-weight: 800;
+      line-height: 1;
+    }
+    .asc-blue .admin-stat-value  { color: #818cf8; }
+    .asc-green .admin-stat-value { color: #34d399; }
+    .asc-amber .admin-stat-value { color: #fbbf24; }
+    .asc-rose .admin-stat-value  { color: #f87171; }
+    .admin-stat-sub {
+      font-size: 0.72rem; color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Student Table Section */
+    .admin-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.2rem;
+    }
+    .admin-section-header h2 {
+      font-size: 1.1rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .admin-section-header h2 i { color: #f59e0b; }
+
+    /* Search + Filter bar */
+    .admin-filter-row {
+      display: flex; gap: 0.8rem; margin-bottom: 1.2rem;
+    }
+    .admin-search {
+      flex: 1; padding: 0.7rem 1rem;
+      border-radius: 12px; border: 1px solid var(--border-color);
+      background: rgba(255,255,255,0.03); color: var(--text-primary);
+      font-family: var(--font-family); font-size: 0.85rem;
+      transition: border-color 0.2s;
+    }
+    .admin-search:focus { outline: none; border-color: var(--admin-accent); }
+    .admin-sort-btn {
+      padding: 0.7rem 1rem;
+      border-radius: 12px; border: 1px solid var(--border-color);
+      background: rgba(255,255,255,0.03); color: var(--text-muted);
+      font-family: var(--font-family); font-size: 0.82rem;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .admin-sort-btn.active, .admin-sort-btn:hover {
+      border-color: var(--admin-accent);
+      color: #fbbf24;
+    }
+    .admin-refresh-btn {
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      color: #fbbf24; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: background 0.2s;
+    }
+    .admin-refresh-btn:hover { background: rgba(245,158,11,0.2); }
+
+    /* Student Registry Sections */
+    #student-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+    .branch-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .branch-section-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 0.8rem;
+      margin-bottom: 0.2rem;
+    }
+    .branch-section-header h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .branch-count-badge {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 20px;
+      padding: 3px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 1px solid;
+    }
+    .branch-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .student-card {
+      background: var(--card-bg-gradient);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.4rem;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .student-card:hover {
+      border-color: rgba(245,158,11,0.3);
+      transform: translateY(-2px);
+    }
+    .student-card-top {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 1rem;
+    }
+    .student-avatar {
+      width: 44px; height: 44px; min-width: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: #fff;
+      font-family: 'Outfit', sans-serif; font-weight: 800;
+    }
+    .student-name-block h4 {
+      font-size: 0.95rem; font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .student-name-block .branch-chip {
+      font-size: 0.68rem; font-weight: 600;
+      color: #818cf8;
+      background: rgba(99,102,241,0.12);
+      border-radius: 20px;
+      padding: 2px 8px;
+      display: inline-block;
+    }
+
+    .student-stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem; margin-bottom: 1rem;
+    }
+    .stu-stat {
+      text-align: center;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 0.5rem 0.3rem;
+    }
+    .stu-stat .sv { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 800; line-height: 1; }
+    .stu-stat .sl { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; margin-top: 2px; }
+    .sv-xp    { color: #818cf8; }
+    .sv-level { color: #34d399; }
+    .sv-streak{ color: #f87171; }
+    .sv-gold  { color: #fbbf24; }
+
+    /* Progress Bar */
+    .student-progress-wrap { margin-bottom: 1rem; }
+    .student-progress-label {
+      font-size: 0.7rem; color: var(--text-muted);
+      display: flex; justify-content: space-between; margin-bottom: 4px;
+    }
+    .student-progress-bar {
+      height: 6px; border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+    .student-progress-fill {
+      height: 100%; border-radius: 20px;
+      background: linear-gradient(90deg, #6366f1, #818cf8);
+      transition: width 0.6s ease;
+    }
+
+    /* Gift GP Section */
+    .gift-gp-row {
+      display: flex; gap: 0.6rem; align-items: center;
+    }
+    .gift-gp-input {
+      flex: 1; padding: 0.6rem 0.8rem;
+      border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03); color: #fff;
+      font-size: 0.82rem; font-family: var(--font-family);
+    }
+    .gift-gp-input:focus { outline: none; border-color: #fbbf24; }
+    .gift-gp-btn {
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: none; color: #fff;
+      font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: opacity 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+    .gift-gp-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Registered date tag */
+    .student-meta {
+      font-size: 0.68rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 0.6rem;
+    }
+
+    /* Empty state */
+    .admin-empty {
+      grid-column: 1/-1;
+      text-align: center; padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    .admin-empty i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+    .admin-empty p { font-size: 0.9rem; }
+
+    /* Toast */
+    .admin-toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff; border-radius: 14px;
+      padding: 0.9rem 1.4rem;
+      font-size: 0.85rem; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 10px 30px rgba(245,158,11,0.4);
+      z-index: 9999;
+      animation: slideInRight 0.3s ease;
+    }
+    @keyframes slideInRight {
+      from { transform: translateX(120%); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+    .admin-toast.out {
+      animation: slideOutRight 0.3s ease forwards;
+    }
+    @keyframes slideOutRight {
+      from { transform: translateX(0); opacity: 1; }
+      to   { transform: translateX(120%); opacity: 0; }
+    }
+
+    /* Delete confirm modal */
+    .confirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; display: none;
+    }
+    .confirm-modal {
+      background: var(--card-bg-gradient);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 20px; padding: 2rem;
+      max-width: 380px; width: 90%;
+      text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    }
+    .confirm-modal h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .confirm-modal p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .confirm-btns { display: flex; gap: 0.8rem; }
+    .confirm-btns button { flex: 1; padding: 0.8rem; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; font-size: 0.85rem; }
+    .btn-cancel { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+    .btn-delete { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
+    @media (max-width: 900px) {
+      .admin-stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .admin-stats-row { grid-template-columns: 1fr 1fr; }
+      #student-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="dark-theme">
+
+  <!-- ══════════════════════════════════════════
+       ADMIN LOGIN GATE
+       ══════════════════════════════════════════ -->
+  <div id="admin-gate">
+    <div class="gate-card">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.55rem; font-weight: 800; text-align: center; margin-bottom: 0.6rem; line-height: 1.35; letter-spacing: -0.02em;">
+        Welcome to<br>
+        <span style="display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; vertical-align: middle;">
+          <i class="fa-solid fa-graduation-cap flame-brand" style="font-size: 1.55rem;"></i>
+          Study<span style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Streak</span><span style="color: var(--admin-accent, #f59e0b); font-weight: 800; margin-left: 4px;">Admin</span>
+        </span>
+      </h2>
+      <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.3); border-radius:20px; padding:4px 12px; font-size:0.72rem; font-weight:700; color:#fbbf24; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem;"><i class="fa-solid fa-shield-halved"></i> Admin Panel</div>
+      <p>This panel is restricted to administrators only. Enter the admin password to continue.</p>
+
+      <input type="password" id="gate-password" class="gate-input" placeholder="Enter admin password..." autocomplete="off">
+      <button class="gate-btn" id="gate-submit-btn">
+        <i class="fa-solid fa-unlock-keyhole"></i> Unlock Panel
+      </button>
+      <p class="gate-error" id="gate-error"><i class="fa-solid fa-triangle-exclamation"></i> Incorrect password. Try again.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       ADMIN DASHBOARD (shown after login)
+       ══════════════════════════════════════════ -->
+  <div id="admin-dashboard">
+
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <i class="fa-solid fa-graduation-cap flame-brand" style="font-size:1.6rem;"></i>
+        <h1 style="font-family:'Outfit',sans-serif; font-size:1.25rem; font-weight:800; letter-spacing:-0.02em; display:flex; align-items:center; gap:0;">Study<span style="color:var(--primary-color);">Streak</span><span style="color:#f59e0b; margin-left:8px; font-size:1rem; font-weight:700;">Admin</span></h1>
+        <span class="admin-badge"><i class="fa-solid fa-circle" style="font-size:0.5rem; color:#22c55e;"></i> Live</span>
+      </div>
+      <div class="admin-header-right">
+        <span style="font-size:0.78rem; color: var(--text-muted);" id="admin-last-refresh"></span>
+        <button class="admin-logout-btn" id="admin-logout">
+          <i class="fa-solid fa-right-from-bracket"></i> Exit Admin
+        </button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="admin-main">
+
+      <!-- Overview Stats -->
+      <div class="admin-stats-row" id="admin-stats-row">
+        <div class="admin-stat-card asc-blue">
+          <div class="admin-stat-label"><i class="fa-solid fa-users"></i> Total Students</div>
+          <div class="admin-stat-value" id="stat-total">0</div>
+          <div class="admin-stat-sub">Registered accounts</div>
+        </div>
+        <div class="admin-stat-card asc-green">
+          <div class="admin-stat-label"><i class="fa-solid fa-fire"></i> Avg. Streak</div>
+          <div class="admin-stat-value" id="stat-streak">0d</div>
+          <div class="admin-stat-sub">Average daily streak</div>
+        </div>
+        <div class="admin-stat-card asc-amber">
+          <div class="admin-stat-label"><i class="fa-solid fa-coins"></i> Total GP Gifted</div>
+          <div class="admin-stat-value" id="stat-gp">0</div>
+          <div class="admin-stat-sub">Gold Points distributed</div>
+        </div>
+        <div class="admin-stat-card asc-rose">
+          <div class="admin-stat-label"><i class="fa-solid fa-bolt"></i> Total XP</div>
+          <div class="admin-stat-value" id="stat-xp">0</div>
+          <div class="admin-stat-sub">Cumulative across all</div>
+        </div>
+      </div>
+
+      <!-- Companion AI Global Configuration (Admin Restricted) -->
+      <div style="background: var(--card-bg-gradient); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.6rem; margin-bottom: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; color: #fff;">
+          <i class="fa-solid fa-brain" style="color: #f59e0b;"></i> Companion AI Global Configuration
+        </h2>
+        <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.2rem; max-width: 900px;">
+          Configure the default artificial intelligence brain for all student study companion pets. Standard students cannot edit their API keys or modes; only administrators have access to change these parameters globally.
+        </p>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 1.2rem; align-items: flex-start;">
+          <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-microchip" style="color: #f59e0b;"></i> Global AI Brain Mode
+            </label>
+            <select id="admin-ai-brain-mode" onchange="window.toggleAdminAIBrainMode()"
+              style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; padding: 0.5rem; border-radius: 10px; font-size: 0.82rem; cursor: pointer; outline: none; box-sizing: border-box; width: 100%;">
+              <option value="persona">Simulated Persona Engine (Local Heuristic)</option>
+              <option value="gemini">Gemini 2.5 API Brain (Live Multimodal AI)</option>
+            </select>
+          </div>
+
+          <div id="admin-ai-key-container" class="hidden" style="flex: 2; min-width: 320px; display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-key" style="color: #f59e0b;"></i> Google Gemini 2.5 API Key
+            </label>
+            <div style="display: flex; gap: 8px; width: 100%;">
+              <input type="password" id="admin-gemini-key-input" placeholder="AIzaSy..."
+                style="flex: 1; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box;">
+              <button onclick="window.saveAdminGeminiApiKey()" class="btn"
+                style="padding: 0.5rem 1.2rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff; transition: opacity 0.2s, transform 0.2s;">
+                Save Key
+              </button>
+            </div>
+            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
+              This API key will unlock real-time live chat and visual OCR screenshot analysis across all adopted student pets using the <strong>Gemini 2.5 Flash</strong> engine. Get a free API key at <a href="https://aistudio.google.com/" target="_blank" style="color: #fbbf24; text-decoration: underline;">Google AI Studio</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Registry -->
+      <div class="admin-section-header">
+        <h2><i class="fa-solid fa-table-list"></i> Student Registry</h2>
+        <button class="admin-refresh-btn" id="refresh-btn">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh
+        </button>
+      </div>
+
+      <div class="admin-filter-row">
+        <input type="text" class="admin-search" id="admin-search" placeholder="&#xF002; Search by username or branch...">
+        <button class="admin-sort-btn active" id="sort-xp" data-sort="xp">
+          <i class="fa-solid fa-bolt"></i> XP
+        </button>
+        <button class="admin-sort-btn" id="sort-streak" data-sort="streak">
+          <i class="fa-solid fa-fire"></i> Streak
+        </button>
+        <button class="admin-sort-btn" id="sort-alpha" data-sort="alpha">
+          <i class="fa-solid fa-arrow-down-a-z"></i> A–Z
+        </button>
+      </div>
+
+      <div id="student-grid">
+        <!-- Populated by admin.js -->
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-modal">
+      <div style="font-size:2rem; margin-bottom:0.8rem;">⚠️</div>
+      <h3>Delete Student Account?</h3>
+      <p id="confirm-text">This will permanently remove this student's data from the registry. This cannot be undone.</p>
+      <div class="confirm-btns">
+        <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+        <button class="btn-delete" id="confirm-delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../backend/js/admin.js"></script>
+</body>
+</html>

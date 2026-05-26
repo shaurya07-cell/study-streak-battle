@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Streak Battle - Login &amp; Sign Up</title>
+  <meta name="description"
+    content="Sign in or create your StudyStreak profile to start tracking your B.Tech study milestones.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Firebase Core and Auth SDKs (Compat version for browser CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script>
+    if (localStorage.getItem('token')) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</head>
+
+<body class="dark-theme">
+  <div id="toast-container" class="toast-container"></div>
+
+  <section class="auth-section">
+    <div class="auth-blur-overlay"></div>
+    <div class="auth-container">
+
+      <div class="auth-card-wrapper">
+        <!-- Login Card -->
+        <div class="auth-card" id="login-card">
+          <h2
+            style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; text-align: center; margin-bottom: 0.6rem; line-height: 1.35; letter-spacing: -0.02em;">
+            Welcome to<br>
+            <span style="display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; vertical-align: middle;">
+              <i class="fa-solid fa-graduation-cap flame-brand" style="font-size: 1.6rem;"></i>
+              Study<span
+                style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Streak</span>
+            </span>
+          </h2>
+          <p class="subtitle">Sign in to continue tracking your B.Tech study milestones.</p>
+
+          <form id="login-form">
+            <div class="form-group">
+              <label for="login-username"><i class="fa-solid fa-user"></i> Username</label>
+              <input type="text" id="login-username" required placeholder="Enter your username..."
+                autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+              <input type="password" id="login-password" required
+                placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block btn-glow">
+              <span>Sign In</span> <i class="fa-solid fa-right-to-bracket"></i>
+            </button>
+          </form>
+
+          <div class="auth-toggle" style="margin-bottom: 0.8rem;">
+            Don't have a study profile? <span id="to-signup">Create one here</span>
+          </div>
+          <div style="text-align: center; font-size: 0.8rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem;">
+            <a href="parent.html" style="color: #818cf8; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <i class="fa-solid fa-user-shield"></i> Are you a parent? Access Parent Desk
+            </a>
+          </div>
+        </div>
+
+        <!-- Signup Card -->
+        <div class="auth-card hidden" id="signup-card">
+          <h2
+            style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; text-align: center; margin-bottom: 0.6rem; line-height: 1.35; letter-spacing: -0.02em;">
+            Welcome to<br>
+            <span style="display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; vertical-align: middle;">
+              <i class="fa-solid fa-graduation-cap flame-brand" style="font-size: 1.6rem;"></i>
+              Study<span
+                style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Streak</span>
+            </span>
+          </h2>
+          <p class="subtitle">Register your branch details to start tracking your revision consistency.</p>
+
+          <!-- Invisible Firebase reCAPTCHA Container -->
+          <div id="recaptcha-container"></div>
+
+          <form id="signup-form">
+            <div class="form-group">
+              <label for="signup-username"><i class="fa-solid fa-user-plus"></i> Preferred Username</label>
+              <input type="text" id="signup-username" required placeholder="e.g., alex_btech" autocomplete="username"
+                minlength="3" maxlength="15">
+            </div>
+            <div class="form-group">
+              <label for="signup-password"><i class="fa-solid fa-lock"></i> Set Password</label>
+              <input type="password" id="signup-password" required
+                placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" autocomplete="new-password"
+                minlength="4">
+            </div>
+            <div class="form-group">
+              <label for="signup-phone"><i class="fa-solid fa-phone"></i> Phone Number</label>
+              <div class="phone-input-row" style="display: flex; gap: 0.5rem;">
+                <input type="tel" id="signup-phone" placeholder="10-digit number" pattern="[0-9]{10}" maxlength="10"
+                  required
+                  style="flex: 1; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #fff;">
+                <button type="button" id="send-otp-btn" class="btn btn-outline"
+                  style="min-width: 100px; padding: 0.8rem 1.2rem; font-size: 0.85rem; border-radius: 12px;">Send
+                  OTP</button>
+              </div>
+            </div>
+
+            <div class="form-group hidden" id="otp-group">
+              <label for="signup-otp"><i class="fa-solid fa-key"></i> Enter OTP</label>
+              <div class="otp-input-row" style="display: flex; gap: 0.5rem;">
+                <input type="text" id="signup-otp" placeholder="6-digit code" pattern="[0-9]{6}" maxlength="6"
+                  style="flex: 1; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: #fff;">
+                <button type="button" id="verify-otp-btn" class="btn btn-primary"
+                  style="min-width: 100px; padding: 0.8rem 1.2rem; font-size: 0.85rem; border-radius: 12px;">Verify</button>
+              </div>
+              <span id="otp-timer-label"
+                style="font-size: 0.8rem; color: var(--accent-color); margin-top: 6px; display: block; font-weight: 500;"></span>
+            </div>
+
+            <div class="form-group">
+              <label for="signup-branch"><i class="fa-solid fa-graduation-cap"></i> Select B.Tech Branch</label>
+              <select id="signup-branch" required class="branch-select-input">
+                <option value="" disabled selected>Choose your engineering branch...</option>
+                <option value="CSE++">&#x1F4BB; CSE++ (Computer Science &amp; Eng ++)</option>
+                <option value="CSE core">&#x1F5A5;&#xFE0F; CSE core (Computer Science &amp; Eng Core)</option>
+                <option value="Ai/Ml">&#x1F916; Ai/Ml (Artificial Intelligence &amp; ML)</option>
+                <option value="ECE">&#x1F4E1; ECE (Electronics &amp; Communication)</option>
+                <option value="ME">&#x1F527; ME (Mechanical Engineering)</option>
+                <option value="EE">&#x26A1; EE (Electrical Engineering)</option>
+                <option value="CE">&#x1F3D7;&#xFE0F; CE (Civil Engineering)</option>
+              </select>
+            </div>
+
+            <button type="submit" id="spawn-btn" class="btn btn-secondary btn-block btn-glow" disabled>
+              <span>Create Profile &amp; Start Studying</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+          </form>
+
+          <div class="auth-toggle" style="margin-bottom: 0.8rem;">
+            Already registered? <span id="to-login">Log in here</span>
+          </div>
+          <div style="text-align: center; font-size: 0.8rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem;">
+            <a href="parent.html" style="color: #818cf8; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <i class="fa-solid fa-user-shield"></i> Are you a parent? Access Parent Desk
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer inside container so it fits in the layout -->
+      <footer class="app-footer" style="border-top: none; background: none; padding: 0; text-align: center; margin-top: -0.5rem; width: 100%;">
+        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.35);">&copy; 2026 Study Streak Battle.</p>
+        <p style="margin-top: 4px; font-size: 0.75rem; color: rgba(255,255,255,0.35);">Created by <strong style="color: rgba(255,255,255,0.55);">Shaurya Hindocha</strong>, RIT Roorkee</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px;">
+          <a href="https://www.instagram.com/shaurya._.2409_/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.75rem; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); transition: all 0.2s ease;" onmouseover="this.style.color='#e1306c'; this.style.borderColor='rgba(225,48,108,0.3)'; this.style.background='rgba(225,48,108,0.06)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.06)'; this.style.background='rgba(255,255,255,0.02)';"><i class="fa-brands fa-instagram"></i> Instagram</a>
+          <a href="https://www.linkedin.com/in/shaurya-hindocha-47961b380/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.75rem; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); transition: all 0.2s ease;" onmouseover="this.style.color='#0a66c2'; this.style.borderColor='rgba(10,102,194,0.3)'; this.style.background='rgba(10,102,194,0.06)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.06)'; this.style.background='rgba(255,255,255,0.02)';"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+          <a href="https://x.com/shaurya240907" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 5px; text-decoration: none; color: rgba(255,255,255,0.4); font-size: 0.75rem; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); transition: all 0.2s ease;" onmouseover="this.style.color='#ffffff'; this.style.borderColor='rgba(255,255,255,0.2)'; this.style.background='rgba(255,255,255,0.05)';" onmouseout="this.style.color='rgba(255,255,255,0.4)'; this.style.borderColor='rgba(255,255,255,0.06)'; this.style.background='rgba(255,255,255,0.02)';"><i class="fa-brands fa-x-twitter"></i> Twitter / X</a>
+        </div>
+      </footer>
+
+    </div>
+  </section>
+
+  <script src="../backend/js/auth.js"></script>
+</body>
+
+</html>
