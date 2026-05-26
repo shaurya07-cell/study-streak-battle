@@ -1,7 +1,8 @@
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
+require("dotenv").config();
 
-const genAI = new GoogleGenerativeAI("AIzaSyAgkxzhpl0jQ74r2iW3zFcGrYw1Hw6HI8o");
-
+console.log(process.env.API_KEY);
 const model = genAI.getGenerativeModel({
   model: "gemini-2.5-flash"
 });
