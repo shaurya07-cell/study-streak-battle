@@ -1,18 +1,27 @@
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
-require("dotenv").config();
+import dotenv from "dotenv";
 
-console.log(process.env.API_KEY);
+dotenv.config();
+
+const apiKey = process.env.GEMINI_API_KEY;
+
+const genAI = new GoogleGenerativeAI(apiKey);
+
 const model = genAI.getGenerativeModel({
   model: "gemini-2.5-flash"
 });
 
 async function run() {
-  const result = await model.generateContent(
-    "Give me a study quote"
-  );
+  try {
+    const result = await model.generateContent(
+      "Give me a study quote"
+    );
 
-  console.log(result.response.text());
+    console.log(result.response.text());
+
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 run();
