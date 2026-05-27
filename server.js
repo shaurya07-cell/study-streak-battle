@@ -108,13 +108,15 @@ apiRouter.post('/send-otp', async (req, res) => {
       });
 
       const data = await response.json();
-      console.log('Twilio API response:', data);
+      console.log('📱 [Twilio API status]:', response.status);
+      console.log('📱 [Twilio API response]:', data);
 
       if (response.ok) {
+        console.log('✅ Twilio SMS dispatched successfully!');
         return res.json({ success: true, message: 'OTP sent to your phone via Twilio!' });
       } else {
         const twilioMsg = data.message || 'Failed to dispatch Twilio SMS.';
-        console.error('Twilio dispatch failed:', twilioMsg);
+        console.error('❌ Twilio dispatch failed:', twilioMsg);
         return res.json({
           success: true,
           message: `Twilio failed: ${twilioMsg} (Auto-Sandbox Mode Active)`,
