@@ -511,46 +511,6 @@
         </div>
       </div>
 
-      <!-- Companion AI Global Configuration (Admin Restricted) -->
-      <div style="background: var(--card-bg-gradient); border: 1px solid var(--border-color); border-radius: 20px; padding: 1.6rem; margin-bottom: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-        <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; color: #fff;">
-          <i class="fa-solid fa-brain" style="color: #f59e0b;"></i> Companion AI Global Configuration
-        </h2>
-        <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.2rem; max-width: 900px;">
-          Configure the default artificial intelligence brain for all student study companion pets. Standard students cannot edit their API keys or modes; only administrators have access to change these parameters globally.
-        </p>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 1.2rem; align-items: flex-start;">
-          <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-microchip" style="color: #f59e0b;"></i> Global AI Brain Mode
-            </label>
-            <select id="admin-ai-brain-mode" onchange="window.toggleAdminAIBrainMode()"
-              style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; padding: 0.5rem; border-radius: 10px; font-size: 0.82rem; cursor: pointer; outline: none; box-sizing: border-box; width: 100%;">
-              <option value="persona">Simulated Persona Engine (Local Heuristic)</option>
-              <option value="gemini">Gemini 2.5 API Brain (Live Multimodal AI)</option>
-            </select>
-          </div>
-
-          <div id="admin-ai-key-container" class="hidden" style="flex: 2; min-width: 320px; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 0.8rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-key" style="color: #f59e0b;"></i> Google Gemini 2.5 API Key
-            </label>
-            <div style="display: flex; gap: 8px; width: 100%;">
-              <input type="password" id="admin-gemini-key-input" placeholder="AIzaSy..."
-                style="flex: 1; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; color: #fff; font-size: 0.82rem; outline: none; box-sizing: border-box;">
-              <button onclick="window.saveAdminGeminiApiKey()" class="btn"
-                style="padding: 0.5rem 1.2rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: #fff; transition: opacity 0.2s, transform 0.2s;">
-                Save Key
-              </button>
-            </div>
-            <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">
-              This API key will unlock real-time live chat and visual OCR screenshot analysis across all adopted student pets using the <strong>Gemini 2.5 Flash</strong> engine. Get a free API key at <a href="https://aistudio.google.com/" target="_blank" style="color: #fbbf24; text-decoration: underline;">Google AI Studio</a>.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <!-- Student Registry -->
       <div class="admin-section-header">
         <h2><i class="fa-solid fa-table-list"></i> Student Registry</h2>

@@ -313,68 +313,6 @@ function renderStudents() {
     'Last updated: ' + new Date().toLocaleTimeString();
 }
 
-// ─── Companion AI Config (Admin Restricted) ───────────────────
-function initAdminAI() {
-  const mode = localStorage.getItem('ss_gemini_brain_mode') || 'persona';
-  const apiKey = localStorage.getItem('ss_gemini_api_key') || '';
-  
-  const selectMode = document.getElementById('admin-ai-brain-mode');
-  const keyInput = document.getElementById('admin-gemini-key-input');
-  const keyContainer = document.getElementById('admin-ai-key-container');
-  
-  if (selectMode) selectMode.value = mode;
-  if (keyInput) keyInput.value = apiKey;
-  if (keyContainer) {
-    keyContainer.classList.toggle('hidden', mode !== 'gemini');
-  }
-}
-
-window.toggleAdminAIBrainMode = function() {
-  const selectMode = document.getElementById('admin-ai-brain-mode');
-  if (!selectMode) return;
-  const val = selectMode.value;
-  
-  localStorage.setItem('ss_gemini_brain_mode', val);
-  
-  const keyContainer = document.getElementById('admin-ai-key-container');
-  if (keyContainer) {
-    keyContainer.classList.toggle('hidden', val !== 'gemini');
-  }
-  
-  adminToast(`Brain Config: ${val === 'gemini' ? 'Gemini 2.5 Live AI' : 'Simulated Persona Engine'}`, 'amber');
-};
-
-window.saveAdminGeminiApiKey = function() {
-  const keyInput = document.getElementById('admin-gemini-key-input');
-  const val = keyInput ? keyInput.value.trim() : '';
-  
-  localStorage.setItem('ss_gemini_api_key', val);
-  
-  if (val !== '') {
-    localStorage.setItem('ss_gemini_brain_mode', 'gemini');
-    const selectMode = document.getElementById('admin-ai-brain-mode');
-    if (selectMode) selectMode.value = 'gemini';
-    
-    const keyContainer = document.getElementById('admin-ai-key-container');
-    if (keyContainer) {
-      keyContainer.classList.remove('hidden');
-    }
-    
-    adminToast('✅ Gemini 2.5 Key Saved & Live AI Enabled!', 'green');
-  } else {
-    localStorage.setItem('ss_gemini_brain_mode', 'persona');
-    const selectMode = document.getElementById('admin-ai-brain-mode');
-    if (selectMode) selectMode.value = 'persona';
-    
-    const keyContainer = document.getElementById('admin-ai-key-container');
-    if (keyContainer) {
-      keyContainer.classList.add('hidden');
-    }
-    
-    adminToast('API Key Cleared. Reverted to offline mode.', 'amber');
-  }
-};
-
 // ─── Unlock the admin panel ──────────────────────────────────
 function unlockAdmin() {
   const pw = document.getElementById('gate-password').value;
@@ -386,7 +324,6 @@ function unlockAdmin() {
     fetchDbUsers(() => {
       updateStats();
       renderStudents();
-      initAdminAI();
     });
 
     // Auto-refresh every 15 seconds
