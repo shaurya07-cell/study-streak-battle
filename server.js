@@ -75,11 +75,11 @@ apiRouter.post('/send-otp', async (req, res) => {
     expiresAt: Date.now() + 5 * 60 * 1000,
   });
 
-  // Read configurations
-  const twilioSid = process.env.TWILIO_ACCOUNT_SID || '';
-  const twilioToken = process.env.TWILIO_AUTH_TOKEN || '';
-  const twilioFrom = process.env.TWILIO_PHONE_NUMBER || '';
-  const fast2smsKey = process.env.FAST2SMS_API_KEY || '';
+  // Read configurations (trimmed and space-stripped for bulletproof copy-paste validation)
+  const twilioSid = (process.env.TWILIO_ACCOUNT_SID || '').trim();
+  const twilioToken = (process.env.TWILIO_AUTH_TOKEN || '').trim();
+  const twilioFrom = (process.env.TWILIO_PHONE_NUMBER || '').replace(/\s+/g, '');
+  const fast2smsKey = (process.env.FAST2SMS_API_KEY || '').trim();
 
   // ── 1. TWILIO DISPATCH ROUTE (100% Free Sandbox for Verified Caller IDs) ──
   if (twilioSid && twilioToken && twilioFrom && twilioSid !== 'YOUR_TWILIO_ACCOUNT_SID') {

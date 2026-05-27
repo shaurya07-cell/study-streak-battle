@@ -187,7 +187,12 @@ document.addEventListener('DOMContentLoaded', () => {
           // If the server console mock returns the OTP because key is not set
           if (data.devOtp) {
             activeOtp = data.devOtp;
-            successMessage = `Dev Mode: OTP is ${data.devOtp} (Logged to server console)`;
+            // If the message contains an error or failure, display it so the developer knows exactly why SMS failed
+            if (data.message && (data.message.includes('failed') || data.message.includes('error') || data.message.includes('Failed'))) {
+              successMessage = `${data.message}. Dev OTP: ${data.devOtp}`;
+            } else {
+              successMessage = `Dev Mode: OTP is ${data.devOtp} (Logged to server console)`;
+            }
             if (window.showToast) {
               window.showToast('🛡️ Dev Verification', successMessage, 'success');
             } else {
