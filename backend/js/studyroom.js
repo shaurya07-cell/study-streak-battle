@@ -250,6 +250,129 @@ async function pushEvent(code, eventObj) {
   }
 }
 
+// ── WebRTC Peer-to-Peer Mesh Connection Manager ──
+const peerConnections = {};
+const rtcConfig = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
+// Send WebRTC signaling payload via MongoDB room events
+async function sendSignal(target, signalType, payload) {
+  if (!activeRoomCode || !currentUser) return;
+  const signalValue = {
+    sender: currentUser.username,
+    signalType,
+    payload
+  };
+  await pushRoomEvent('webrtc_signal', target, signalValue);
+}
+
+// Get or create RTCPeerConnection for a classmate
+function getOrCreatePC(classmateName) {
+  if (peerConnections[classmateName]) {
+    return peerConnections[classmateName];
+  }
+
+  console.log(`📡 [WebRTC]: Initializing RTCPeerConnection for ${classmateName}...`);
+  const pc = new RTCPeerConnection(rtcConfig);
+  peerConnections[classmateName] = pc;
+
+  // Add all existing local media tracks to the PC
+  if (localMediaStream) {
+    localMediaStream.getTracks().forEach(track => {
+      pc.addTrack(track, localMediaStream);
+    });
+  }
+
+  // Handle ICE Candidates
+  pc.onicecandidate = (event) => {
+    if (event.candidate) {
+      console.log(`📡 [WebRTC]: Sending ICE candidate to ${classmateName}`);
+      sendSignal(classmateName, 'candidate', event.candidate);
+    }
+  };
+
+  // Handle stream tracks received from remote classmate
+  pc.ontrack = (event) => {
+    console.log(`📡 [WebRTC]: Received remote track from ${classmateName}`);
+    const peerId = `peer-${classmateName.toLowerCase().replace(/\s+/g, '-')}`;
+    const videoEl = document.getElementById(`video-${peerId}`);
+    const placeholder = document.getElementById(`placeholder-${peerId}`);
+    
+    if (videoEl && event.streams && event.streams[0]) {
+      videoEl.srcObject = event.streams[0];
+      videoEl.classList.remove('hidden');
+      if (placeholder) placeholder.classList.add('hidden');
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    console.log(`📡 [WebRTC Connection State with ${classmateName}]: ${pc.connectionState}`);
+    if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+      closePC(classmateName);
+    }
+  };
+
+  return pc;
+}
+
+// Close connection and clean up elements
+function closePC(classmateName) {
+  const pc = peerConnections[classmateName];
+  if (pc) {
+    console.log(`📡 [WebRTC]: Closing RTCPeerConnection for ${classmateName}`);
+    try {
+      pc.close();
+    } catch (e) {}
+    delete peerConnections[classmateName];
+  }
+  const peerId = `peer-${classmateName.toLowerCase().replace(/\s+/g, '-')}`;
+  const videoEl = document.getElementById(`video-${peerId}`);
+  const placeholder = document.getElementById(`placeholder-${peerId}`);
+  if (videoEl) {
+    videoEl.srcObject = null;
+    videoEl.classList.add('hidden');
+  }
+  if (placeholder) {
+    placeholder.classList.remove('hidden');
+  }
+}
+
+// Process incoming signaling messages
+async function handleIncomingSignal(sender, signalType, payload) {
+  console.log(`📡 [WebRTC]: Received signal [${signalType}] from ${sender}`);
+  const pc = getOrCreatePC(sender);
+
+  if (signalType === 'offer') {
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(payload));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      console.log(`📡 [WebRTC]: Sending SDP answer to ${sender}`);
+      sendSignal(sender, 'answer', pc.localDescription);
+    } catch (err) {
+      console.error('Failed to handle incoming SDP offer:', err);
+    }
+  } else if (signalType === 'answer') {
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(payload));
+    } catch (err) {
+      console.error('Failed to handle incoming SDP answer:', err);
+    }
+  } else if (signalType === 'candidate') {
+    try {
+      if (payload) {
+        await pc.addIceCandidate(new RTCIceCandidate(payload));
+      }
+    } catch (err) {
+      console.error('Failed to add remote ICE candidate:', err);
+    }
+  }
+}
+
 // Generate a peer card element for a participant
 function buildPeerCard(username, peerId, colorIdx) {
   const palette = PEER_COLORS[colorIdx % PEER_COLORS.length];
@@ -271,12 +394,13 @@ function buildPeerCard(username, peerId, colorIdx) {
         <i class="fa-solid fa-user-minus"></i>
       </button>
     </div>
-    <div class="big-video-placeholder">
+    <div class="big-video-placeholder" id="placeholder-${peerId}">
       <div class="big-placeholder-avatar" style="background: ${palette.bg}; color: ${palette.color}; border-color: ${palette.color.replace(')', ', 0.2)').replace('rgb', 'rgba')};">
         <i class="fa-solid fa-user-graduate"></i>
       </div>
       <span class="big-placeholder-name">${username}</span>
     </div>
+    <video id="video-${peerId}" autoplay playsinline class="big-video-feed hidden"></video>
     <div class="big-video-overlay-info">
       <span class="big-participant-name">${username}</span>
       <span class="big-mic-status-badge" id="${peerId}-mic"><i class="fa-solid fa-microphone"></i></span>
@@ -395,6 +519,27 @@ async function syncRoomState() {
     colorIdx++;
   });
 
+  // Ensure WebRTC peer connections are active for all real participants in the room
+  Object.keys(participants).forEach(uname => {
+    if (uname === currentUser?.username) return; // skip self
+    const participant = participants[uname];
+    if (participant && !participant.simulated) {
+      if (!peerConnections[uname]) {
+        const pc = getOrCreatePC(uname);
+        const isCaller = currentUser.username.toLowerCase() < uname.toLowerCase();
+        if (isCaller) {
+          pc.createOffer()
+            .then(offer => pc.setLocalDescription(offer))
+            .then(() => {
+              console.log(`📡 [WebRTC]: Initiating SDP offer to ${uname}`);
+              sendSignal(uname, 'offer', pc.localDescription);
+            })
+            .catch(err => console.error('Failed to create WebRTC offer:', err));
+        }
+      }
+    }
+  });
+
   // ── Remove participants who left ──────────────────────────────────────────
   Object.keys(lastKnownParticipants).forEach(uname => {
     if (uname === currentUser?.username) return;
@@ -402,6 +547,9 @@ async function syncRoomState() {
       const peerId = `peer-${uname.toLowerCase().replace(/\s+/g, '-')}`;
       const card = document.getElementById(peerId);
       if (card) {
+        // WebRTC: Close connection
+        closePC(uname);
+
         if (pinnedParticipantId === peerId) window.togglePinParticipant(peerId);
         card.style.opacity = '0';
         card.style.transform = 'scale(0.85)';
@@ -429,6 +577,14 @@ async function syncRoomState() {
   events.forEach(ev => {
     if (ev.ts <= processedTs) return; // already handled
     latestProcessedTs = Math.max(latestProcessedTs, ev.ts);
+
+    // WebRTC: Process incoming signaling events
+    if (ev.action === 'webrtc_signal' && ev.target.toLowerCase() === myUsername.toLowerCase()) {
+      const signal = ev.value;
+      if (signal && signal.sender !== myUsername) {
+        handleIncomingSignal(signal.sender, signal.signalType, signal.payload);
+      }
+    }
 
     // Events that target ME (non-host tab receiving commands)
     if (!isRoomHost && ev.target === myUsername) {
@@ -510,9 +666,15 @@ function onStorageChange(e) {
 }
 
 function exitToLobby() {
-  // Stop all media
+  // Stop all media tracks
   if (localMediaStream) { localMediaStream.getTracks().forEach(t => t.stop()); localMediaStream = null; }
   if (screenMediaStream) { screenMediaStream.getTracks().forEach(t => t.stop()); screenMediaStream = null; }
+  
+  // WebRTC: Close all active classmate peer connections
+  Object.keys(peerConnections).forEach(uname => {
+    closePC(uname);
+  });
+
   micEnabled = true; camEnabled = false; screenSharingActive = false;
   activeRoomCode = null; isRoomHost = false;
   addedPeers = [];
@@ -522,11 +684,41 @@ function exitToLobby() {
   window.location.reload();
 }
 
+// ── WebRTC Pre-warmed Media Stream Initialization ──
+async function initLocalMediaStream() {
+  try {
+    console.log('📡 [WebRTC]: Initializing local camera & microphone capture...');
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localMediaStream = stream;
+    
+    // Disable tracks initially if muted/disabled
+    stream.getVideoTracks().forEach(track => track.enabled = camEnabled);
+    stream.getAudioTracks().forEach(track => track.enabled = micEnabled);
+
+    // Bind local stream to preview feed
+    const videoEl = document.getElementById('room-local-video');
+    const placeholder = document.getElementById('local-video-placeholder');
+    if (videoEl) {
+      videoEl.srcObject = stream;
+      if (camEnabled) {
+        videoEl.classList.remove('hidden');
+        if (placeholder) placeholder.classList.add('hidden');
+      }
+    }
+  } catch (err) {
+    console.warn('📡 [WebRTC]: Media access capture failed:', err);
+    showToast('Media Access Alert', 'Please allow camera and mic permissions to participate in co-working calls!', 'alert');
+  }
+}
+
 // ── Host a new room ───────────────────────────────────────────────────────
 window.hostStudyRoom = async function() {
   if (window.playSynthSound) window.playSynthSound('click');
   const randomCode = 'ST-' + Math.floor(100 + Math.random() * 900);
   const myName = currentUser?.username || 'Host';
+
+  // Warm up video & audio stream tracks first
+  await initLocalMediaStream();
 
   try {
     const res = await fetch('/api/studyrooms/host', {
@@ -575,6 +767,9 @@ window.joinStudyRoom = async function() {
   }
 
   const myName = currentUser?.username || 'Guest';
+
+  // Warm up video & audio stream tracks first
+  await initLocalMediaStream();
 
   try {
     const res = await fetch('/api/studyrooms/join', {
@@ -635,6 +830,12 @@ window.toggleLocalMic = function() {
   const btn = document.getElementById('toggle-mic-btn');
   const badge = document.getElementById('local-mic-badge');
   
+  if (localMediaStream) {
+    localMediaStream.getAudioTracks().forEach(track => {
+      track.enabled = micEnabled;
+    });
+  }
+
   if (micEnabled) {
     btn.className = "btn btn-outline btn-circle active-mic";
     btn.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
@@ -652,13 +853,6 @@ window.toggleLocalMic = function() {
     }
     showToast('Mic Muted', 'Microphone audio capture disabled.', 'info');
   }
-  
-  // Toggle audio track if stream exists
-  if (localMediaStream) {
-    localMediaStream.getAudioTracks().forEach(track => {
-      track.enabled = micEnabled;
-    });
-  }
 
   // Sync state to MongoDB
   if (activeRoomCode && currentUser) {
@@ -675,54 +869,34 @@ window.toggleLocalCam = function() {
   const webcamOverlayEl = document.getElementById('room-local-webcam');
   const placeholder = document.getElementById('local-video-placeholder');
   
+  if (localMediaStream) {
+    localMediaStream.getVideoTracks().forEach(track => {
+      track.enabled = camEnabled;
+    });
+  }
+
   if (camEnabled) {
     btn.className = "btn btn-outline btn-circle active-cam";
     btn.innerHTML = `<i class="fa-solid fa-video"></i>`;
     
-    // Attempt camera track capture
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        localMediaStream = stream;
-        
-        // Disable audio track if currently muted in controls
-        stream.getAudioTracks().forEach(track => {
-          track.enabled = micEnabled;
-        });
-        
-        if (screenSharingActive) {
-          // Play webcam stream in picture-in-picture overlay
-          if (webcamOverlayEl) {
-            webcamOverlayEl.srcObject = stream;
-            webcamOverlayEl.classList.remove('hidden');
-          }
-        } else {
-          // Play webcam stream in main video feed
-          if (videoEl) {
-            videoEl.srcObject = stream;
-            videoEl.classList.remove('hidden');
-          }
-          if (placeholder) placeholder.classList.add('hidden');
-        }
-        showToast('Camera Connected', 'Active video broadcast streaming.', 'success');
-        if (activeRoomCode && currentUser) {
-          pushRoomEvent('cam', currentUser.username, true);
-        }
-      })
-      .catch(err => {
-        console.warn('Camera access blocked or not found: ', err);
-        camEnabled = false;
-        btn.className = "btn btn-outline btn-circle disabled-cam";
-        btn.innerHTML = `<i class="fa-solid fa-video-slash"></i>`;
-        showToast('Camera Access Blocked', 'Could not open video stream. Verify camera permissions!', 'alert');
-      });
+    if (screenSharingActive) {
+      if (webcamOverlayEl) {
+        webcamOverlayEl.srcObject = localMediaStream;
+        webcamOverlayEl.classList.remove('hidden');
+      }
+    } else {
+      if (videoEl) {
+        videoEl.classList.remove('hidden');
+      }
+      if (placeholder) placeholder.classList.add('hidden');
+    }
+    showToast('Camera Connected', 'Active video broadcast streaming.', 'success');
+    if (activeRoomCode && currentUser) {
+      pushRoomEvent('cam', currentUser.username, true);
+    }
   } else {
     btn.className = "btn btn-outline btn-circle disabled-cam";
     btn.innerHTML = `<i class="fa-solid fa-video-slash"></i>`;
-    
-    // Stop local video tracks
-    if (localMediaStream) {
-      localMediaStream.getVideoTracks().forEach(track => track.stop());
-    }
     
     if (screenSharingActive) {
       if (webcamOverlayEl) {
@@ -731,7 +905,6 @@ window.toggleLocalCam = function() {
       }
     } else {
       if (videoEl) {
-        videoEl.srcObject = null;
         videoEl.classList.add('hidden');
       }
       if (placeholder) placeholder.classList.remove('hidden');
@@ -745,6 +918,11 @@ window.toggleLocalCam = function() {
 
 window.leaveStudyRoom = async function() {
   if (window.playSynthSound) window.playSynthSound('click');
+
+  // WebRTC: Close all active classmate connections
+  Object.keys(peerConnections).forEach(uname => {
+    closePC(uname);
+  });
 
   if (activeRoomCode) {
     const myName = currentUser?.username;
