@@ -14,20 +14,8 @@ if (window.location.protocol === 'file:') {
 }
 
 // ════════════════════════════════════════════════════════════
-// IMPORTANT: Replace this config block with your own credentials from Firebase Console!
-const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-// Initialize Firebase if loaded in browser
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+// Authentication is powered by Fast2SMS server-side API endpoints
+// ════════════════════════════════════════════════════════════
 
 // Smart navigation routing helper to resolve relative paths directly into standard .html pages
 window.navigateTo = function (page) {
@@ -180,88 +168,75 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       activePhone = phone;
-      const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY";
-
-      if (!isFirebaseConfigured) {
-        // ── DEV FALLBACK MODE: Local Mock OTP ──
-        console.warn('⚠️ Firebase credentials not set. Falling back to Dev mockup mode.');
-        const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        activeOtp = mockOtp;
-        if (otpGroup) otpGroup.classList.remove('hidden');
-
-        const msg = `OTP (dev mock) generated: ${mockOtp}`;
-        if (window.showToast) {
-          window.showToast('🛡️ Dev Verification', msg, 'success');
-        } else {
-          alert(`🛡️ Dev Verification\n${msg}`);
-        }
-      } else {
-        // ── FIREBASE PRODUCTION MODE: Real SMS Delivery ──
-        let formattedPhone = phone;
-        if (!formattedPhone.startsWith('+')) {
-          formattedPhone = '+91' + formattedPhone; // Default to India country prefix
-        }
-
-        // Initialize invisible Recaptcha Verifier if not already present
-        if (!recaptchaVerifier && typeof firebase !== 'undefined') {
-          try {
-            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-              size: 'invisible'
-            });
-          } catch (recaptchaErr) {
-            console.error('reCAPTCHA initialization failed:', recaptchaErr);
-          }
-        }
-
-        if (typeof firebase === 'undefined' || !recaptchaVerifier) {
-          console.warn('⚠️ Firebase SDK failed to initialize. Falling back to Dev mockup mode.');
-          const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
-          activeOtp = mockOtp;
-          if (otpGroup) otpGroup.classList.remove('hidden');
-          if (window.showToast) {
-            window.showToast('Dev Mock Activated', `OTP generated: ${mockOtp}`, 'success');
-          }
-        } else {
-          // Trigger Firebase SMS Delivery
-          const auth = firebase.auth();
-          auth.signInWithPhoneNumber(formattedPhone, recaptchaVerifier)
-            .then(result => {
-              confirmationResult = result;
-              if (otpGroup) otpGroup.classList.remove('hidden');
-              if (window.showToast) {
-                window.showToast('🛡️ SMS Sent', 'A secure 6-digit verification code has been sent to your phone!', 'success');
-              } else {
-                alert('A secure 6-digit verification code has been sent to your phone!');
-              }
-            })
-            .catch(err => {
-              console.error('Firebase Auth SMS dispatch error:', err);
-              if (window.showToast) {
-                window.showToast('Firebase Error', err.message || 'SMS delivery failed. Check console.', 'alert');
-              } else {
-                alert('Firebase SMS Delivery Failed: ' + err.message);
-              }
-            });
-        }
-      }
-
-      // Start Countdown
-      resendCountdown = 30;
+      
+      // Disable send button during the request
       sendOtpBtn.setAttribute('disabled', 'true');
-      sendOtpBtn.innerText = `Resend (${resendCountdown}s)`;
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        resendCountdown--;
-        if (resendCountdown <= 0) {
-          clearInterval(timerInterval);
-          sendOtpBtn.removeAttribute('disabled');
-          sendOtpBtn.innerText = 'Resend OTP';
-          if (otpTimerLabel) otpTimerLabel.innerText = '';
-        } else {
+      sendOtpBtn.innerText = 'Sending...';
+
+      fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          if (otpGroup) otpGroup.classList.remove('hidden');
+
+          let successMessage = data.message;
+          // If the server console mock returns the OTP because key is not set
+          if (data.devOtp) {
+            activeOtp = data.devOtp;
+            successMessage = `Dev Mode: OTP is ${data.devOtp} (Logged to server console)`;
+            if (window.showToast) {
+              window.showToast('🛡️ Dev Verification', successMessage, 'success');
+            } else {
+              alert(successMessage);
+            }
+          } else {
+            if (window.showToast) {
+              window.showToast('🛡️ OTP Sent', 'A secure 6-digit verification code has been sent to your phone!', 'success');
+            } else {
+              alert('A secure 6-digit verification code has been sent to your phone!');
+            }
+          }
+
+          // Start Countdown timer
+          resendCountdown = 30;
           sendOtpBtn.innerText = `Resend (${resendCountdown}s)`;
-          if (otpTimerLabel) otpTimerLabel.innerText = `You can request a new OTP code in ${resendCountdown} seconds.`;
+          if (timerInterval) clearInterval(timerInterval);
+          timerInterval = setInterval(() => {
+            resendCountdown--;
+            if (resendCountdown <= 0) {
+              clearInterval(timerInterval);
+              sendOtpBtn.removeAttribute('disabled');
+              sendOtpBtn.innerText = 'Resend OTP';
+              if (otpTimerLabel) otpTimerLabel.innerText = '';
+            } else {
+              sendOtpBtn.innerText = `Resend (${resendCountdown}s)`;
+              if (otpTimerLabel) otpTimerLabel.innerText = `You can request a new OTP code in ${resendCountdown} seconds.`;
+            }
+          }, 1000);
+        } else {
+          sendOtpBtn.removeAttribute('disabled');
+          sendOtpBtn.innerText = 'Send OTP';
+          if (window.showToast) {
+            window.showToast('OTP Dispatch Failed', data.message || 'Failed to dispatch SMS.', 'alert');
+          } else {
+            alert(data.message || 'Failed to dispatch SMS.');
+          }
         }
-      }, 1000);
+      })
+      .catch(err => {
+        console.error('Send OTP network error:', err);
+        sendOtpBtn.removeAttribute('disabled');
+        sendOtpBtn.innerText = 'Send OTP';
+        if (window.showToast) {
+          window.showToast('Server Error', 'Failed to communicate with OTP dispatcher.', 'alert');
+        } else {
+          alert('Failed to communicate with OTP dispatcher.');
+        }
+      });
     });
   }
 
@@ -279,70 +254,58 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY";
+      verifyOtpBtn.setAttribute('disabled', 'true');
+      verifyOtpBtn.innerText = 'Verifying...';
 
-      if (!isFirebaseConfigured || !confirmationResult) {
-        // ── DEV FALLBACK MODE: Local Mock OTP Verification ──
-        if (typedOtp === activeOtp) {
+      fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: activePhone, otp: typedOtp })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
           otpVerified = true;
 
-          // Lock UI
+          // Lock UI inputs
           otpInput.setAttribute('disabled', 'true');
           document.getElementById('signup-phone').setAttribute('disabled', 'true');
           verifyOtpBtn.setAttribute('disabled', 'true');
+          verifyOtpBtn.innerText = 'Verified';
           if (sendOtpBtn) sendOtpBtn.setAttribute('disabled', 'true');
           if (timerInterval) clearInterval(timerInterval);
 
           if (otpTimerLabel) {
-            otpTimerLabel.innerText = '✅ Phone Verified Successfully (Dev Mode)!';
+            otpTimerLabel.innerText = '✅ Phone Verified Successfully!';
             otpTimerLabel.style.color = '#22c55e';
           }
 
           if (spawnBtn) spawnBtn.removeAttribute('disabled');
 
           if (window.showToast) {
-            window.showToast('Verified!', 'Your identity is verified. Create your profile!', 'success');
+            window.showToast('Verified!', 'Your phone is successfully verified. Create your profile!', 'success');
           }
         } else {
+          verifyOtpBtn.removeAttribute('disabled');
+          verifyOtpBtn.innerText = 'Verify';
           otpInput.value = '';
           if (window.showToast) {
-            window.showToast('Verification Failed', 'Invalid developer code. Please try again!', 'alert');
+            window.showToast('Verification Failed', data.message || 'Incorrect SMS code. Please try again!', 'alert');
+          } else {
+            alert(data.message || 'Incorrect SMS code. Please try again!');
           }
         }
-      } else {
-        // ── FIREBASE PRODUCTION MODE: Real OTP Verification ──
-        confirmationResult.confirm(typedOtp)
-          .then(result => {
-            otpVerified = true;
-
-            // Lock UI
-            otpInput.setAttribute('disabled', 'true');
-            document.getElementById('signup-phone').setAttribute('disabled', 'true');
-            verifyOtpBtn.setAttribute('disabled', 'true');
-            if (sendOtpBtn) sendOtpBtn.setAttribute('disabled', 'true');
-            if (timerInterval) clearInterval(timerInterval);
-
-            if (otpTimerLabel) {
-              otpTimerLabel.innerText = '✅ Phone Verified Successfully!';
-              otpTimerLabel.style.color = '#22c55e';
-            }
-
-            if (spawnBtn) spawnBtn.removeAttribute('disabled');
-
-            if (window.showToast) {
-              window.showToast('Verified!', 'Your phone is successfully verified. Create your profile!', 'success');
-            }
-          })
-          .catch(err => {
-            console.error('Firebase confirmation error:', err);
-            otpInput.value = '';
-            if (window.showToast) {
-              window.showToast('Verification Failed', 'Incorrect SMS code. Please try again!', 'alert');
-            } else {
-              alert('Incorrect SMS code. Please try again!');
-            }
-          });
-      }
+      })
+      .catch(err => {
+        console.error('Verify OTP network error:', err);
+        verifyOtpBtn.removeAttribute('disabled');
+        verifyOtpBtn.innerText = 'Verify';
+        if (window.showToast) {
+          window.showToast('Server Error', 'Failed to communicate with OTP verifier.', 'alert');
+        } else {
+          alert('Failed to communicate with OTP verifier.');
+        }
+      });
     });
   }
 

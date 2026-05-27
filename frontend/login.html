@@ -14,9 +14,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
-  <!-- Firebase Core and Auth SDKs (Compat version for browser CDN) -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <!-- Fast2SMS Backend OTP verification system (no client Firebase dependencies) -->
   <script>
     if (localStorage.getItem('token')) {
       window.location.href = 'dashboard.html';
@@ -84,8 +82,7 @@
           </h2>
           <p class="subtitle">Register your branch details to start tracking your revision consistency.</p>
 
-          <!-- Invisible Firebase reCAPTCHA Container -->
-          <div id="recaptcha-container"></div>
+
 
           <form id="signup-form">
             <div class="form-group">
