@@ -484,10 +484,16 @@ server.listen(PORT, () => {
   console.log(`   Send OTP:     POST http://localhost:${PORT}/api/send-otp`);
   console.log(`   Verify OTP:   POST http://localhost:${PORT}/api/verify-otp`);
   console.log(`   Health Check: GET  http://localhost:${PORT}/api/health\n`);
-  if (!process.env.FAST2SMS_API_KEY || process.env.FAST2SMS_API_KEY === 'YOUR_API_KEY_HERE') {
-    console.log('⚠️  FAST2SMS_API_KEY is not set.');
-    console.log('   → Create a FREE account at https://www.fast2sms.com');
-    console.log('   → Copy your API key from the Dev API section');
-    console.log('   → Set it in .env file: FAST2SMS_API_KEY=your_key_here\n');
+  const twilioSid = (process.env.TWILIO_ACCOUNT_SID || '').trim();
+  const twilioToken = (process.env.TWILIO_AUTH_TOKEN || '').trim();
+  const twilioFrom = (process.env.TWILIO_PHONE_NUMBER || '').replace(/\s+/g, '');
+  const fast2smsKey = (process.env.FAST2SMS_API_KEY || '').trim();
+
+  if (twilioSid && twilioToken && twilioFrom && twilioSid !== 'YOUR_TWILIO_ACCOUNT_SID') {
+    console.log('📱 SMS Gateway status: Twilio is ACTIVE and fully configured!\n');
+  } else if (fast2smsKey && fast2smsKey !== 'YOUR_API_KEY_HERE') {
+    console.log('📱 SMS Gateway status: Fast2SMS is ACTIVE and fully configured!\n');
+  } else {
+    console.log('⚠️  SMS Gateway status: Running in Dev Sandbox Mode (No keys configured)\n');
   }
 });
