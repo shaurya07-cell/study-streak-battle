@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 // ─── 1. User Schema (RPG Student Profile) ───
 const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true, index: true },
+  username: { type: String, required: true, unique: true, index: true, lowercase: true },
   password: { type: String, required: true },
   studentId: { type: String },
   parentId: { type: String },
@@ -36,7 +36,7 @@ const UserSchema = new mongoose.Schema({
 
 // ─── 2. ChatSession Schema (Companion Doubt Log with Photo Uploads) ───
 const ChatSessionSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true, index: true },
+  username: { type: String, required: true, unique: true, index: true, lowercase: true },
   messages: [{
     sender: { type: String, enum: ['user', 'companion'], required: true },
     text: { type: String },

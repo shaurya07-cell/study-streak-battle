@@ -408,6 +408,51 @@ document.addEventListener('DOMContentLoaded', () => {
       const passwordInput = document.getElementById('login-password').value;
       const key = usernameInput.toLowerCase();
 
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      let originalBtnHtml = '';
+      if (submitBtn) {
+        originalBtnHtml = submitBtn.innerHTML;
+        submitBtn.setAttribute('disabled', 'true');
+        submitBtn.innerHTML = `<span>Authenticating...</span> <i class="fa-solid fa-circle-notch fa-spin"></i>`;
+      }
+
+      const resetSubmitBtn = () => {
+        if (submitBtn) {
+          submitBtn.removeAttribute('disabled');
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      };
+
+      // ── 1. INSTANT LOCAL-FIRST CREDENTIAL BYPASS ──
+      const localUsers = JSON.parse(localStorage.getItem('users') || '{}');
+      const localUser = localUsers[key];
+
+      if (localUser && localUser.password === passwordInput) {
+        console.log('⚡ [Instant Login]: Local credentials verified. Granting instant entry.');
+        
+        // Log in immediately!
+        const sessionToken = `local_session_${key}`;
+        localStorage.setItem('token', sessionToken);
+        
+        // Concurrently run a silent background profile refresh from the database
+        fetch(`/api/user/${key}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.user) {
+              const updatedUsers = JSON.parse(localStorage.getItem('users') || '{}');
+              updatedUsers[key] = data.user;
+              localStorage.setItem('users', JSON.stringify(updatedUsers));
+              console.log('🍃 [Instant Login background sync]: Profile updated from server successfully.');
+            }
+          })
+          .catch(err => console.warn('🍃 [Instant Login background sync]: Failed to connect to server. Local state kept.'));
+
+        // Navigate instantly!
+        window.navigateTo('/dashboard');
+        return;
+      }
+
+      // ── 2. SECURE NETWORK FALLBACK (New device/session or updated password) ──
       // Fetch user profile stats from MongoDB
       fetch(`/api/user/${key}`)
       .then(res => res.json())
@@ -423,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('token', sessionToken);
             window.navigateTo('/dashboard');
           } else {
+            resetSubmitBtn();
             if (window.showToast) {
               window.showToast('Access Denied', 'Invalid credentials. Double check password!', 'alert');
             } else {
@@ -439,6 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('token', sessionToken);
             window.navigateTo('/dashboard');
           } else {
+            resetSubmitBtn();
             if (window.showToast) {
               window.showToast('Access Denied', 'Invalid credentials or user not registered!', 'alert');
             } else {
@@ -457,6 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('token', sessionToken);
           window.navigateTo('/dashboard');
         } else {
+          resetSubmitBtn();
           if (window.showToast) {
             window.showToast('Access Denied', 'Invalid credentials. Offline mode mismatch!', 'alert');
           } else {

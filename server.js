@@ -19,13 +19,26 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/studystreak';
 
-console.log('🍃 Connecting to MongoDB...');
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('🍃 MongoDB connected successfully!'))
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    console.log('⚠️ Running in offline-memory mode for database fallback.');
+let cachedDb = null;
+async function connectToDatabase() {
+  if (cachedDb && mongoose.connection.readyState === 1) {
+    return cachedDb;
+  }
+  console.log('🍃 Connecting to MongoDB (establishing new connection)...');
+  cachedDb = await mongoose.connect(MONGODB_URI, {
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    family: 4
   });
+  console.log('🍃 MongoDB connected successfully!');
+  return cachedDb;
+}
+
+// Initial connection attempt during startup
+connectToDatabase().catch(err => {
+  console.error('❌ MongoDB initial connection error:', err);
+  console.log('⚠️ Running in offline-memory mode for database fallback.');
+});
 
 // ── Multer Storage Configuration (Photo Uploads) ──
 const uploadDir = join(__dirname, 'uploads');
@@ -58,6 +71,17 @@ const otpStore = new Map();
 // API Router — must be registered BEFORE static files
 // ──────────────────────────────────────────────────────────
 const apiRouter = express.Router();
+
+// Pre-warm database connection middleware for serverless performance
+apiRouter.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (err) {
+    console.error('❌ Database connection error inside API middleware:', err);
+    next(); // graceful fallback
+  }
+});
 
 // POST /api/send-otp
 apiRouter.post('/send-otp', async (req, res) => {
@@ -230,8 +254,11 @@ apiRouter.post('/sync-user', async (req, res) => {
 
   try {
     const key = username.toLowerCase();
+    if (data && typeof data === 'object') {
+      data.username = key;
+    }
     const user = await User.findOneAndUpdate(
-      { username: new RegExp(`^${key}$`, 'i') },
+      { username: key },
       { $set: data },
       { new: true, upsert: true }
     );
@@ -245,7 +272,7 @@ apiRouter.post('/sync-user', async (req, res) => {
 apiRouter.get('/user/:username', async (req, res) => {
   const { username } = req.params;
   try {
-    const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
+    const user = await User.findOne({ username: username.toLowerCase() });
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     return res.json({ success: true, user });
   } catch (err) {
@@ -258,7 +285,7 @@ apiRouter.get('/user/:username', async (req, res) => {
 apiRouter.get('/chats/:username', async (req, res) => {
   const { username } = req.params;
   try {
-    const session = await ChatSession.findOne({ username: new RegExp(`^${username}$`, 'i') });
+    const session = await ChatSession.findOne({ username: username.toLowerCase() });
     return res.json({ success: true, messages: session ? session.messages : [] });
   } catch (err) {
     console.error('Fetch chats error:', err);
@@ -273,7 +300,7 @@ apiRouter.post('/chats/message', async (req, res) => {
   try {
     const key = username.toLowerCase();
     const session = await ChatSession.findOneAndUpdate(
-      { username: new RegExp(`^${key}$`, 'i') },
+      { username: key },
       {
         $push: { messages: { sender, text, imageUrl, timestamp: new Date() } },
         $set: { updatedAt: new Date() }
@@ -388,7 +415,7 @@ apiRouter.post('/admin/gift-gp', async (req, res) => {
   try {
     const key = username.toLowerCase();
     const user = await User.findOneAndUpdate(
-      { username: new RegExp(`^${key}$`, 'i') },
+      { username: key },
       { $inc: { gold: amount } },
       { new: true }
     );
@@ -412,7 +439,7 @@ apiRouter.post('/admin/gift-gp', async (req, res) => {
 apiRouter.delete('/admin/delete/:username', async (req, res) => {
   const { username } = req.params;
   try {
-    const user = await User.findOneAndDelete({ username: new RegExp(`^${username}$`, 'i') });
+    const user = await User.findOneAndDelete({ username: username.toLowerCase() });
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
     return res.json({ success: true, message: `Account for ${user.username} deleted.` });
   } catch (err) {
