@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
 import { User, ChatSession, ActiveRoom, GiftLog } from './models.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -291,6 +292,78 @@ apiRouter.post('/chats/upload', upload.single('photo'), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded.' });
   const fileUrl = `/uploads/${req.file.filename}`;
   return res.json({ success: true, fileUrl });
+});
+
+// POST /api/ai/doubt - Secure server-side Gemini AI doubt solver (hides keys from the browser)
+apiRouter.post('/ai/doubt', async (req, res) => {
+  const { systemPrompt, query, attachedImgData, attachedImgMime } = req.body;
+
+  const apiKey = process.env.GEMINI_API_KEY || '';
+
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+    console.warn('⚠️ GEMINI_API_KEY is not set on the server.');
+    return res.json({
+      success: false,
+      message: 'GEMINI_API_KEY not configured on the server. Falling back to local brain heuristics.'
+    });
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const contents = [];
+    const parts = [
+      { text: `${systemPrompt}\n\nUser Prompt: ${query || "Please analyze this uploaded visual concept/question image."}` }
+    ];
+
+    if (attachedImgData && attachedImgMime) {
+      parts.push({
+        inlineData: {
+          mimeType: attachedImgMime,
+          data: attachedImgData
+        }
+      });
+    }
+
+    contents.push({ parts });
+
+    const result = await model.generateContent({ contents });
+    const responseText = result.response.text();
+
+    return res.json({ success: true, answer: responseText });
+  } catch (err) {
+    console.error('Gemini primary model failed:', err);
+    // Fallback to gemini-1.5-flash
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      const contents = [];
+      const parts = [
+        { text: `${systemPrompt}\n\nUser Prompt: ${query || "Please analyze this uploaded visual concept/question image."}` }
+      ];
+
+      if (attachedImgData && attachedImgMime) {
+        parts.push({
+          inlineData: {
+            mimeType: attachedImgMime,
+            data: attachedImgData
+          }
+        });
+      }
+
+      contents.push({ parts });
+
+      const result = await model.generateContent({ contents });
+      const responseText = result.response.text();
+
+      return res.json({ success: true, answer: responseText });
+    } catch (fallbackErr) {
+      console.error('Gemini fallback failed:', fallbackErr);
+      return res.status(500).json({ success: false, message: fallbackErr.message || 'AI service error.' });
+    }
+  }
 });
 
 // ─── Admin Desk APIs ───

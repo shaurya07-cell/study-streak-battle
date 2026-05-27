@@ -2515,153 +2515,85 @@ window.sendPetChatMessage = function () {
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  let brainMode = localStorage.getItem('ss_gemini_brain_mode') || 'persona';
-  const apiKey = (localStorage.getItem('ss_gemini_api_key') || '').trim();
+  const systemPrompt = getPetSystemPrompt(pet.type, pet.name);
 
-  // Fail-safe auto upgrade: if a valid API key is present, automatically enable Live Gemini Brain!
-  if (apiKey !== '' && brainMode === 'persona') {
-    brainMode = 'gemini';
-    localStorage.setItem('ss_gemini_brain_mode', 'gemini');
-  }
+  // Send request to our secure backend AI doubt solver endpoint
+  fetch('/api/ai/doubt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      systemPrompt: systemPrompt,
+      query: query || "Please analyze this uploaded visual concept/question image.",
+      attachedImgData: attachedImgData,
+      attachedImgMime: attachedImgMime
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    // Remove thinking indicator
+    const thinkingEl = document.getElementById(thinkingId);
+    if (thinkingEl) thinkingEl.remove();
 
-  if (brainMode === 'gemini' && apiKey !== '') {
-    // Mode A: Google Gemini Real AI Brain API Connection
-    const systemPrompt = getPetSystemPrompt(pet.type, pet.name);
-    const contents = [];
-    const parts = [
-      { text: `${systemPrompt}\n\nUser Prompt: ${query || "Please analyze this uploaded visual concept/question image."}` }
-    ];
-
-    if (attachedImgData) {
-      parts.push({
-        inlineData: {
-          mimeType: attachedImgMime,
-          data: attachedImgData
-        }
-      });
+    let answer = "";
+    if (data.success && data.answer) {
+      // Backend resolved doubt successfully with Gemini!
+      answer = data.answer;
+      if (window.playSynthSound) window.playSynthSound('success');
+    } else {
+      // Fallback: Local Smart Heuristics
+      console.warn('Backend AI doubt solver fallback active:', data.message);
+      answer = getLocalSmartFallback(pet.type, query, attachedImgName);
+      if (window.playSynthSound) window.playSynthSound('click');
     }
 
-    contents.push({ parts });
+    // Save and render response
+    pet.chatHistory.push({ sender: 'pet', text: answer });
+    while (pet.chatHistory.length > 25) pet.chatHistory.shift();
 
-    const makeGeminiFetch = (modelName) => {
-      return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents })
-      });
-    };
+    saveUserState(currentUser);
+    renderPetChatBoxOnly(pet);
 
-    makeGeminiFetch('gemini-2.5-flash')
-      .then(async res => {
-        if (res.status === 503 || res.status === 429 || !res.ok) {
-          console.warn(`Primary model gemini-2.5-flash status ${res.status}. Trying fallback model gemini-1.5-flash...`);
-          const fallbackRes = await makeGeminiFetch('gemini-1.5-flash');
-          const fallbackData = await fallbackRes.json();
-          if (!fallbackRes.ok) {
-            const errMsg = fallbackData.error ? fallbackData.error.message : `HTTP status ${fallbackRes.status}`;
-            throw new Error(errMsg);
-          }
-          return fallbackData;
-        }
-        return await res.json();
+    // POST companion response to MongoDB Chat History
+    fetch('/api/chats/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: currentUser.username,
+        sender: 'companion',
+        text: answer
       })
-      .then(data => {
-        // Remove thinking indicator
-        const thinkingEl = document.getElementById(thinkingId);
-        if (thinkingEl) thinkingEl.remove();
+    })
+    .catch(err => console.warn('Chat sync error:', err));
+  })
+  .catch(err => {
+    console.warn('Backend AI Fetch failed, falling back to local heuristics:', err);
 
-        let answer = "";
-        if (data.error) {
-          answer = getPetApiErrorMsg(pet.type, pet.name, data.error.message);
-        } else {
-          try {
-            answer = data.candidates[0].content.parts[0].text;
-          } catch (err) {
-            answer = getPetApiErrorMsg(pet.type, pet.name, "Invalid response payload from API");
-          }
-        }
+    // Remove thinking indicator
+    const thinkingEl = document.getElementById(thinkingId);
+    if (thinkingEl) thinkingEl.remove();
 
-        pet.chatHistory.push({ sender: 'pet', text: answer });
-        while (pet.chatHistory.length > 25) pet.chatHistory.shift();
+    const answer = getLocalSmartFallback(pet.type, query, attachedImgName);
 
-        saveUserState(currentUser);
-        renderPetChatBoxOnly(pet);
+    pet.chatHistory.push({ sender: 'pet', text: answer });
+    while (pet.chatHistory.length > 25) pet.chatHistory.shift();
 
-        // POST companion response to MongoDB Chat History
-        fetch('/api/chats/message', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: currentUser.username,
-            sender: 'companion',
-            text: answer
-          })
-        })
-          .catch(err => console.warn('Chat sync error:', err));
+    saveUserState(currentUser);
+    renderPetChatBoxOnly(pet);
 
-        if (window.playSynthSound) window.playSynthSound('success');
+    // POST companion response to MongoDB Chat History
+    fetch('/api/chats/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: currentUser.username,
+        sender: 'companion',
+        text: answer
       })
-      .catch(err => {
-        console.warn('Gemini API Fetch failed: ', err);
+    })
+    .catch(err => console.warn('Chat sync error:', err));
 
-        // Remove thinking indicator
-        const thinkingEl = document.getElementById(thinkingId);
-        if (thinkingEl) thinkingEl.remove();
-
-        const errorMsgText = err.message || "Network request failed";
-        const answer = getPetApiErrorMsg(pet.type, pet.name, errorMsgText);
-
-        pet.chatHistory.push({ sender: 'pet', text: answer });
-        while (pet.chatHistory.length > 25) pet.chatHistory.shift();
-
-        saveUserState(currentUser);
-        renderPetChatBoxOnly(pet);
-
-        // POST companion response to MongoDB Chat History
-        fetch('/api/chats/message', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: currentUser.username,
-            sender: 'companion',
-            text: answer
-          })
-        })
-          .catch(err => console.warn('Chat sync error:', err));
-
-        showToast('API Connection Error', errorMsgText, 'alert');
-        if (window.playSynthSound) window.playSynthSound('click');
-      });
-
-  } else {
-    // Mode B: Smart Local Heuristics
-    setTimeout(() => {
-      const thinkingEl = document.getElementById(thinkingId);
-      if (thinkingEl) thinkingEl.remove();
-
-      const answer = getLocalSmartFallback(pet.type, query, attachedImgName);
-
-      pet.chatHistory.push({ sender: 'pet', text: answer });
-      while (pet.chatHistory.length > 25) pet.chatHistory.shift();
-
-      saveUserState(currentUser);
-      renderPetChatBoxOnly(pet);
-
-      // POST companion response to MongoDB Chat History
-      fetch('/api/chats/message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: currentUser.username,
-          sender: 'companion',
-          text: answer
-        })
-      })
-        .catch(err => console.warn('Chat sync error:', err));
-
-      if (window.playSynthSound) window.playSynthSound('click');
-    }, 1000);
-  }
+    if (window.playSynthSound) window.playSynthSound('click');
+  });
 };
 
 function renderPetChatBoxOnly(pet) {
